@@ -37,7 +37,9 @@ def init_data(fname):
 
 			item = {
 				'city': row[0],
-				'months': months
+				'months': months,
+				'longitude': -1,
+				'latitude': -1
 			}
 
 			data.append(item)
@@ -73,12 +75,35 @@ def add_data(fname,df):
 
 	return df
 
+def add_coordinates(fname,df):
+	next_csv = fname +'.csv'
+
+	fobject = open(next_csv, 'rU')
+	reader = csv.reader(fobject)
+	header = next(reader, None)
+
+	# Loop over the file.
+	for row in reader:
+		months_index = range(1,len(header))
+
+		city_index = [i for i, j in enumerate(df) if j['city'] == row[0]]
+		
+		if len(city_index) > 0:
+			city_index = city_index[0]
+
+			df[city_index]['longitude'] = row[1]
+			df[city_index]['latitude'] = row[2]
+
+	return df
+
 # read data from CSV
 data = init_data('allhomes')
 files = ['1br','2br','3br','4br','5br']
 
 for f in files:
 	data = add_data(f,data)
+
+data = add_coordinates('coordinates',data)
 
 # save json file
 with open('data.json', 'w') as outfile:
