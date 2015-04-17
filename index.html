@@ -23,9 +23,9 @@
     <script src="libs/d3/d3.min.js" charset="utf-8"></script>
     <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
     <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+    <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
     <script src="http://d3js.org/queue.v1.min.js"></script>
     <script src="http://d3js.org/topojson.v1.min.js"></script>
-    <script src="http://d3js.org/d3.hexbin.v0.min.js"></script>
 
     <!--Stylesheets-->
     <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
@@ -58,7 +58,7 @@
 		2015-02
 		*/
 	    var projection = d3.geo.albers()
-    		.scale(1300)
+    		.scale(1000)
     		.translate([width / 2, height / 2])
     		.precision(.1);      
 	    var svg = d3.select("body").append("svg")
@@ -69,35 +69,91 @@
 	    var g = svg.append("g");
 	    function createhexagons(yearmonth){
 	    	var year = Math.floor(yearmonth / 12)
-	    	console.log(year)
 	    	var month = yearmonth % 12
 	    	if (month == 0){
 	    		month = 12
 	    	}
-	    	console.log(month)
-	    	filtereddata = realestatedata;
+	    	filtereddata = realestatedata
 	    	for (x in filtereddata){
-	    		filtereddata[x].months = filtereddata[x].months.filter(function(a, b){
+	    		filtereddata[x].months = realestatedata[x].months.filter(function(a, b){
 	    			var yearmontharray = a.month.split("-");
 	    			var currentyear = parseInt(yearmontharray[0])
 	    			var currentmonth = parseInt(yearmontharray[1])
 	    			if (currentyear == year){
 	    				if (currentmonth == month){
-	    					console.log('penis')
 	    					return true
 	    				}
 	    			}
 	    			return false
 	    		})
+	    		filtereddata[x].x = projection(filtereddata[x].longitude, filtereddata[x].latitude)[0]
+	    		filtereddata[x].y = projection(filtereddata[x].longitude, filtereddata[x].latitude)[1]
 	    	}
+	    	console.log('poop');
+	    	/*
+	    	svg.selectAll(".nodes")
+	    		.data(filtereddata)
+	    		.enter().append("circle", ".nodes")
+	    		.attr("transform", function(d){
+	    			console.log("penis");
+	    			return "translate(300,300)"
+	    		})
+	    		.attr("r", "8px")
+	    		.attr("fill", "steelblue")
+			
+	    	svg.selectAll("nodes")
+	    		.data(filtereddata)
+    		.enter().append("circle", "nodes")
+	    		.attr("cx", 300)
+	    		.attr("cy", 300)
+	    		.attr("fill", "steelblue")
+	    		.attr("r", "8px");
+	    	*/
+	    	svg.selectAll(".node")
+	    		.data(filtereddata)
+	    		.enter().append("g")
+	    			.attr("class", "node")
+	    		.append("circle")
+	    		.attr("r", 8)
+	    		.attr("cx", function(d){return 952.76})
+	    		.attr("cy", function(d){return 300})
+	    		.attr("fill", "steelblue")
+
+	    	/*
+			var node = svg.selectAll(".node")
+		        .data(filtereddata)
+		      .enter()
+		        .append("g").attr("class", "node");
+					node.append("circle")
+					.attr("r", 5)
+					.attr("transform", function(d) { 
+          				return "translate("+d.x+","+d.y+")"; 
+        			});
+        	*/
 	    	
-	    	console.log(realestatedata)
+	    	console.log(filtereddata);
 
 	    }
+	    /*
+	    var node = svg.selectAll(".node")
+	    		.data([3, 5, 8])
+	    		.enter().append("g")
+	    			.attr("class", "node");
+	    	node.append("circle")
+	    		.attr("r", 100)
+	    		.attr("cx", function(d,i){return 300*i + 500})
+	    		.attr("cy", function(d){return 300})
+	    		.attr("fill", "steelblue")
+		*/
 	      
     	function ready(error, mapstuff, data){
     		console.log(mapstuff)
-    		realestatedata = data;
+    		array = []
+    		for (x in data){
+    			array.push(data[x])
+    		}
+    		realestatedata = array;
+    		console.log(realestatedata)
     	
     		svg.append("path")
     			.datum(topojson.feature(mapstuff, mapstuff.objects.land))
@@ -109,6 +165,7 @@
     			.attr("class", "states")
     			.attr("d", path);
     		console.log(data)
+    		createhexagons(23956);
     	}
     	queue()
     		.defer(d3.json, "us.json")
