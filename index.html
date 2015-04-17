@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <style>
+		path {
+		  fill: none;
+		  stroke-linejoin: round;
+		}
+
+		.land {
+		  fill: #ddd;
+		}
+
+		.states,
+		.hexagons path {
+		  stroke: #fff;
+		}
+	</style>
+    <title>Homework 3 - MyWorld Data</title>
+
+    <!-- ADD Libraries-->
+    <script src="libs/d3/d3.min.js" charset="utf-8"></script>
+    <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
+    <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <script src="http://d3js.org/d3.hexbin.v0.min.js"></script>
+
+    <!--Stylesheets-->
+    <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
+
+    <!-- Get some nice font-->
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+
+</head>
+<body>
+    <div class="container">
+        <h1>CS171 Project</h1>
+
+        <div class="row">
+            <div class="col-md-8 col-sm-12">
+               <p> This is a prototype for our project</p>
+            </div>
+
+        </div>
+        Time Update: <input type="range" name="yearmonth" min="23956" max="24182" step="1" value="0" id="slider" oninput = ";"> <br>
+    </div>
+    <script>
+    	var margin = {top: 50, bottom: 10, left: 20, right: 20};
+		var width = 1500 - margin.left - margin.right; 
+		var height = 900 - margin.top - margin.bottom;
+		var realestatedata;
+		var filtereddata;
+		/*
+		var timeScale = 
+		1996-04
+		2015-02
+		*/
+	    var projection = d3.geo.albers()
+    		.scale(1300)
+    		.translate([width / 2, height / 2])
+    		.precision(.1);      
+	    var svg = d3.select("body").append("svg")
+	          .attr("width", width)
+	          .attr("height", height);
+	    var path = d3.geo.path()
+	          .projection(projection);
+	    var g = svg.append("g");
+	    function createhexagons(yearmonth){
+	    	var year = Math.floor(yearmonth / 12)
+	    	console.log(year)
+	    	var month = yearmonth % 12
+	    	if (month == 0){
+	    		month = 12
+	    	}
+	    	console.log(month)
+	    	filtereddata = realestatedata;
+	    	for (x in filtereddata){
+	    		filtereddata[x].months = filtereddata[x].months.filter(function(a, b){
+	    			var yearmontharray = a.month.split("-");
+	    			var currentyear = parseInt(yearmontharray[0])
+	    			var currentmonth = parseInt(yearmontharray[1])
+	    			if (currentyear == year){
+	    				if (currentmonth == month){
+	    					console.log('penis')
+	    					return true
+	    				}
+	    			}
+	    			return false
+	    		})
+	    	}
+	    	
+	    	console.log(realestatedata)
+
+	    }
+	      
+    	function ready(error, mapstuff, data){
+    		console.log(mapstuff)
+    		realestatedata = data;
+    	
+    		svg.append("path")
+    			.datum(topojson.feature(mapstuff, mapstuff.objects.land))
+    			.attr("class", "land")
+    			.attr("d", path);
+
+    		svg.append("path")
+    			.datum(topojson.mesh(mapstuff, mapstuff.objects.states, function(a, b) { return a !== b; }))
+    			.attr("class", "states")
+    			.attr("d", path);
+    		console.log(data)
+    	}
+    	queue()
+    		.defer(d3.json, "us.json")
+    		.defer(d3.json, "data/data.json")
+    		.await(ready);
+    	d3.select("#slider").on("input", function(){
+   			createhexagons(this.value);
+   		})
+    </script>
+</body>
+</html>
