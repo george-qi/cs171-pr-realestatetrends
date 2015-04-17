@@ -68,3 +68,42 @@ div.tooltip {
   border-radius: 8px;           
   pointer-events: none;         
 }
+
+h1 {
+  font-family: Tahoma, Arial, Helvetica, sans-serif;
+  font-size: 23px;
+  font-weight: normal;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+thead {
+  font-weight: bold;
+}
+
+table td, table th, caption {
+  padding: 3px;
+  border: 1px solid gray;;
+}
+
+table th {
+  cursor: n-resize;
+}
+
+table th.sorted {
+  cursor: s-resize;
+}
+
+table td:first-child, table td:nth-child(2) {
+  text-align: center;
+}
+
+table tr.odd {
+  background-color: #EEE;
+}
+
+td {
+  text-align: right;
+}
