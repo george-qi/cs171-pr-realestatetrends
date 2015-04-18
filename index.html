@@ -1,190 +1,155 @@
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <meta charset="UTF-8">
-    <style>
-		path {
-		  fill: none;
-		  stroke-linejoin: round;
-		}
+  <meta charset="UTF-8">
+  <title>CS171 Project</title>
 
-		.land {
-		  fill: #ddd;
-		}
+  <!-- ADD Libraries-->
+  <script src="libs/d3/d3.min.js" charset="utf-8"></script>
+  <script src="http://d3js.org/queue.v1.min.js"></script>
+  <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
+  <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+  <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
+  <script src="http://d3js.org/queue.v1.min.js"></script>
+  <script src="http://d3js.org/topojson.v1.min.js"></script>
 
-		.states,
-		.hexagons path {
-		  stroke: #fff;
-		}
-	</style>
-    <title>Homework 3 - MyWorld Data</title>
+  <!--Stylesheets-->
+  <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
 
-    <!-- ADD Libraries-->
-    <script src="libs/d3/d3.min.js" charset="utf-8"></script>
-    <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
-    <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
-    <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
-    <script src="http://d3js.org/queue.v1.min.js"></script>
-    <script src="http://d3js.org/topojson.v1.min.js"></script>
+  <!-- Get some nice font-->
+  <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
 
-    <!--Stylesheets-->
-    <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
+    <!-- add own vis classes-->
+    <script src = "js/tableview.js"></script>
+    <script src = "js/mapview.js"></script>
 
-    <!-- Get some nice font-->
-    <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+    <!-- add own stylesheet-->
+    <link rel="stylesheet" type="text/css" href="css/myStyle.css">
 
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>CS171 Project</h1>
+      <h1>CS171 Project</h1>
 
-        <div class="row">
-            <div class="col-md-8 col-sm-12">
-               <p> This is a prototype for our project</p>
-            </div>
-
+      <div class="row">
+        <div class="col-md-8 col-sm-12">
+         <p> The following visualization is a current prototype for our CS171 Project.</p>
         </div>
+
+      </div>
+
+      <div class="row">
+      <div class="col-md-4">
+        Filter By:
+        <label><input type="checkbox" name="All" value="All" title="All" onchange="update_filters(this.value, this.checked)"></input>All</label>
+        <label><input type="checkbox" name="1br" value="1br" title="1br" onchange="update_filters(this.value, this.checked)"></input>1br</label>
+        <label><input type="checkbox" name="2br" value="2br" title="2br" onchange="update_filters(this.value, this.checked)"></input>2br</label>
+        <label><input type="checkbox" name="3br" value="3br" title="3br" onchange="update_filters(this.value, this.checked)"></input>3br</label>
+        <label><input type="checkbox" name="4br" value="4br" title="4br" onchange="update_filters(this.value, this.checked)"></input>4br</label>
+        <label><input type="checkbox" name="5br" value="5br" title="5br" onchange="update_filters(this.value, this.checked)"></input>5br</label>
+      </div>
+
+      <div class="col-md-8">
+        <b>Current Month: </b> <span id="monthInfo"></span>
         Time Update: <input type="range" name="yearmonth" min="23956" max="24182" step="1" value="0" id="slider" oninput = ";"> <br>
+      </div>
     </div>
-    <script>
-		var width = 1200; 
-		var height = 700 ;
-		var realestatedata;
-		var filtereddata;
-		/*
-		var timeScale = 
-		1996-04
-		2015-02
-		*/
-		
-	    var projection = d3.geo.albersUsa()
-    		.scale(1200)
-    		.translate([width / 2, height / 2])
-    		.precision(.1);      
-	    var svg = d3.select("body").append("svg")
-	          .attr("width", width)
-	          .attr("height", height);
-	    var path = d3.geo.path()
-	          .projection(projection);
-	    var g = svg.append("g");
-	    function createhexagons(yearmonth){
-	    	svg.selectAll('.node').remove()
-	    	var year = Math.floor(yearmonth / 12)
-	    	var month = yearmonth % 12
-	    	if (month == 0){
-	    		month = 12
-	    	}
-	    	filtereddata = jQuery.extend(true, {}, realestatedata)
-	    	for (x in filtereddata){
-	    		filtereddata[x].months = realestatedata[x].months.filter(function(a, b){
-	    			var yearmontharray = a.month.split("-");
-	    			var currentyear = parseInt(yearmontharray[0])
-	    			var currentmonth = parseInt(yearmontharray[1])
-	    			if (currentyear == year){
-	    				if (currentmonth == month){
-	    					return true
-	    				}
-	    			}
-	    			return false
-	    		})
-	    		//Should be flipped since Jacob flipped Latitude and Longitudes
-	    		filtereddata[x].x = projection([filtereddata[x].latitude, filtereddata[x].longitude])[0]
-	    		filtereddata[x].y = projection([filtereddata[x].latitude, filtereddata[x].longitude])[1]
-	    	}
-	    	array = []
-    		for (x in filtereddata){
-    			array.push(filtereddata[x])
-    		}
-    		filtereddata = array
-	    	console.log('poop');
-	    	console.log(filtereddata)
-	    	console.log(realestatedata)
-	    	var max = d3.max(filtereddata, function(d){return d.months[0].allhomes})
-	    	var min = d3.min(filtereddata, function(d){return d.months[0].allhomes})
-	    	var radius = d3.scale.linear()
-	    		.domain([min, max])
-				.range([0, 12]);
-	    	/*
-	    	svg.selectAll(".nodes")
-	    		.data(filtereddata)
-	    		.enter().append("circle", ".nodes")
-	    		.attr("transform", function(d){
-	    			console.log("penis");
-	    			return "translate(300,300)"
-	    		})
-	    		.attr("r", "8px")
-	    		.attr("fill", "steelblue")
-			
-	    	svg.selectAll("nodes")
-	    		.data(filtereddata)
-    		.enter().append("circle", "nodes")
-	    		.attr("cx", 300)
-	    		.attr("cy", 300)
-	    		.attr("fill", "steelblue")
-	    		.attr("r", "8px");
-	    	*/
-	    	svg.selectAll(".node")
-	    		.data(filtereddata)
-	    		.enter().append("g")
-	    			.attr("class", "node")
-	    		.append("circle")
-	    		.attr("r", function(d){return radius(d.months[0].allhomes)})
-	    		.attr("cx", function(d){return d.x})
-	    		.attr("cy", function(d){return d.y})
-	    		.attr("fill", "steelblue")
 
-	    	/*
-			var node = svg.selectAll(".node")
-		        .data(filtereddata)
-		      .enter()
-		        .append("g").attr("class", "node");
-					node.append("circle")
-					.attr("r", 5)
-					.attr("transform", function(d) { 
-          				return "translate("+d.x+","+d.y+")"; 
-        			});
-        	*/
-	    	
-	    	console.log(filtereddata);
+    <div class="row">
+      <div class="col-md-8" id="mapVis">
+      </div>
+      <div class="col-md-4" id="tableVis">
+      </div>
+    </div>
 
-	    }
-	    /*
-	    var node = svg.selectAll(".node")
-	    		.data([3, 5, 8])
-	    		.enter().append("g")
-	    			.attr("class", "node");
-	    	node.append("circle")
-	    		.attr("r", 100)
-	    		.attr("cx", function(d,i){return 300*i + 500})
-	    		.attr("cy", function(d){return 300})
-	    		.attr("fill", "steelblue")
-		*/
-	      
-    	function ready(error, mapstuff, data){
-    		console.log(mapstuff)
-    		
-    		realestatedata = data;
-    		console.log(realestatedata)
-    	
-    		svg.append("path")
-    			.datum(topojson.feature(mapstuff, mapstuff.objects.land))
-    			.attr("class", "land")
-    			.attr("d", path);
+    <div class="row">
+      <div class="col-md-12" id="prioVis">
+      </div>
+    </div>
+  </div>
 
-    		svg.append("path")
-    			.datum(topojson.mesh(mapstuff, mapstuff.objects.states, function(a, b) { return a !== b; }))
-    			.attr("class", "states")
-    			.attr("d", path);
-    		console.log(data)
-    		createhexagons(23956);
-    	}
-    	queue()
-    		.defer(d3.json, "us.json")
-    		.defer(d3.json, "data/data.json")
-    		.await(ready);
-    	d3.select("#slider").on("input", function(){
-   			createhexagons(this.value);
-   		})
-    </script>
+<script>
+
+// $(function() { 
+//////////////////////////////
+////// GLOBAL VARIABLES //////
+//////////////////////////////
+var mapData;
+var realData;
+var econData;
+var MyEventHandler = new Object();
+var vars = {
+  'month': "1996-04",
+  'filter': [] 
+}
+
+var dateFormatter = d3.time.format("%Y-%m-%d");
+
+var initVis = function() {
+  var map_vis = new MapVis(d3.select("#mapVis"), mapData, realData, vars)
+  var table_vis = new TableVis(d3.select("#tableVis"), realData, vars)
+
+  $(MyEventHandler).bind("selectionChanged", function(event) {
+    // document.getElementById('monthInfo').innerHTML = dateFormatter(selectionStart) + " -> " + dateFormatter(selectionEnd)
+    map_vis.onSelectionChange(vars);
+    table_vis.onSelectionChange(vars);
+  });
+}
+
+// call this function after both files are loaded -- error should be "null" if no error
+var dataLoaded = function (error, _mapData, _realData, _econData) {
+  if (!error) {
+    // console.log(_mapData)
+    array = []
+    for (x in _realData) {
+      array.push(_realData[x])
+    }
+    realData = array;
+    mapData = _mapData;
+    econData = _econData;
+
+    initVis(vars.month);
+  }
+}
+
+var startHere = function() {
+  queue()
+    .defer(d3.json, "us.json")
+    .defer(d3.json, "data/data.json")
+    .defer(d3.json, "data/econdata.json")
+    .await(dataLoaded)
+}
+
+startHere();
+
+d3.select("#slider").on("input", function(){
+  var year = Math.floor(this.value / 12)
+  var month = this.value % 12
+  if (month == 0) month = 12
+
+  var month_string = month < 10 ? "0" + month : String(month)
+  var ans = year + "-" + month
+
+  vars.month = year + "-" + month_string
+  $(MyEventHandler).trigger("selectionChanged")
+})
+
+// }) // end entire function
+
+function update_filters(value, add) {
+  if(add) {
+    if(vars.filter.indexOf(value) < 0) {
+      vars.filter.push(value)
+    }
+  } else {
+    var index = vars.filter.indexOf(value)
+    if(index > -1)
+      vars.filter.splice(index, 1);
+  }
+  
+  $(MyEventHandler).trigger("selectionChanged")
+}
+
+</script>
 </body>
 </html>

@@ -2,7 +2,14 @@
  * CS171 Project: George Qi, Jacob Kim, and Lawrence Kim
  */
 
-TableVis = function(_parentElement, _realData, _month) {
+vars = {
+    'month': " ",
+    'filter': [],
+    'columns': ['City', 'State', 'All', '1br', '2br', '3br', '4br', '5br'],
+    'sort_by': {'column': 'City', 'asc': true}
+}
+
+TableVis = function(_parentElement, _realData, _vars) {
     this.parentElement = _parentElement;
     this.data = _realData;
     this.displayData = [];
@@ -12,11 +19,12 @@ TableVis = function(_parentElement, _realData, _month) {
     // this.height = 330 - this.margin.top - this.margin.bottom
 
     this.vars = {
-        'month': _month,
+        'month': _vars.month,
         'filter': [],
         'columns': ['City', 'State', 'All', '1br', '2br', '3br', '4br', '5br'],
         'sort_by': {'column': 'City', 'asc': true}
     }
+    vars.month = _vars.month
 
     this.initVis();
 }
@@ -61,7 +69,7 @@ TableVis.prototype.initVis = function() {
       .attr("class", "row");
 
     var cells = rows.selectAll("td")
-        .data(row_data)
+        .data(this.row_data)
         .enter()
         .append("td")
         .text(function(d) { return d; })
@@ -83,11 +91,17 @@ TableVis.prototype.initVis = function() {
  * Method to wrangle the data. In this case it takes an options object
  * @param _filterFunction - a function that filters data or "null" if none
  */
-TableVis.prototype.wrangleData = function(_filterFunction){
-    this.displayData = this.filterAndAggregate(this.month);
+TableVis.prototype.wrangleData = function() {
+
+    var array = ['City', 'State', 'All', '1br', '2br', '3br', '4br', '5br']
+    var has_filter = ['City', 'State']
+    this.vars.columns = this.vars.filter.length == 0 ? array : has_filter.concat(this.vars.filter)
+    vars.columns = this.vars.filter.length == 0 ? array : has_filter.concat(this.vars.filter)
+
+    this.displayData = this.filterAndAggregate(this.vars.month);
 }
 
-/**
+ /**
  * the drawing function - should use the D3 selection, enter, exit
  */
 TableVis.prototype.updateVis = function() {
@@ -122,7 +136,7 @@ TableVis.prototype.updateVis = function() {
       .attr("class", "row");
 
     var cells = rows.selectAll("td")
-        .data(row_data)
+        .data(this.row_data)
         .enter()
         .append("td")
         .text(function(d) { return d; })
@@ -145,9 +159,10 @@ TableVis.prototype.updateVis = function() {
  * be defined here.
  * @param selection
  */
-TableVis.prototype.onSelectionChange = function(month) {
-    console.log("entered TableVis selection")
-    this.vars.month = month;
+TableVis.prototype.onSelectionChange = function(_vars) {
+
+    this.vars.month = _vars.month;
+    this.vars.filter = _vars.filter;
 
     this.wrangleData(null);
     this.updateVis();
@@ -167,7 +182,9 @@ TableVis.prototype.onSelectionChange = function(month) {
  * @returns {Array|*}
  */
 TableVis.prototype.filterAndAggregate = function(yearmonth) {
+
     var that = this;    
+
     var filteredData = this.data.map(function(d) {
         var tmp = d.city.split(", ")
         for (i=0; i < 227; i ++) {
@@ -189,15 +206,10 @@ TableVis.prototype.filterAndAggregate = function(yearmonth) {
     return filteredData;
 }
 
-function row_data(row, i) {
-    // Creates an array first of the size of the desired rows
-    // Then fills the array with the appropriate data
-    // Applies some formatting depending on the index of the column
-    return ['City', 'State', 'All', '1br', '2br', '3br', '4br', '5br'].map(function(column, i) {
-
+TableVis.prototype.row_data = function(row, i) {
+    return vars.columns.map(function(column, i) {
         if(i == 0 || i == 1) 
             return row[column];      
-        
         else {
             return row[column] > 0 ? "$" + d3.format(",")(row[column]) : "No Data"
         }

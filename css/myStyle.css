@@ -107,3 +107,17 @@ table tr.odd {
 td {
   text-align: right;
 }
+
+path {
+  fill: none;
+  stroke-linejoin: round;
+}
+
+.land {
+  fill: #ddd;
+}
+
+.states,
+.hexagons path {
+  stroke: #fff;
+}

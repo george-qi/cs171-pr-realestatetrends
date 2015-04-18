@@ -2,16 +2,22 @@
  * CS171 Project: George Qi, Jacob Kim, and Lawrence Kim
  */
 
-MapVis = function(_parentElement, _data, _metaData) {
+MapVis = function(_parentElement, _mapData, _realData, _vars) {
     this.parentElement = _parentElement;
-    this.data = _data;
-    this.metaData = _metaData;
-    this.month = month;
+    this.mapData = _mapData
+    this.realData = _realData;
+    this.month = _vars.month;
+    this.filter = _vars.filter
     this.displayData = [];
 
     this.margin = {top: 20, right: 20, bottom: 30, left: 20}
-    this.width = 230 - this.margin.left - this.margin.right
-    this.height = 330 - this.margin.top - this.margin.bottom
+    this.width = 730 - this.margin.left - this.margin.right
+    this.height = 450 - this.margin.top - this.margin.bottom
+
+    this.projection = d3.geo.albersUsa()
+        .scale(900)
+        .translate([this.width / 2, this.height / 2])
+        .precision(.1);
 
     this.initVis();
 }
@@ -19,7 +25,7 @@ MapVis = function(_parentElement, _data, _metaData) {
 /**
  * Method that sets up the SVG and the variables
  */
-MapVis.prototype.initVis = function(){
+MapVis.prototype.initVis = function() {
 
     var that = this;
     
@@ -32,35 +38,19 @@ MapVis.prototype.initVis = function(){
         .append("g")
             .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
 
-    this.svg.append("text")
-        .attr("transform", function(d) { return "translate(100,0)"})
-        .attr("dy", ".35em")
-        .style("text-anchor", "middle")
-        .text("Age Distribution")
+    var path = d3.geo.path()
+          .projection(that.projection);
+    var g = this.svg.append("g");
 
-    var max_count = d3.max(this.displayData, function(d) { return d; })
+    this.svg.append("path")
+        .datum(topojson.feature(that.mapData, that.mapData.objects.land))
+        .attr("class", "land")
+        .attr("d", path);
 
-    this.x = d3.scale.linear()
-        .domain([0, max_count])
-        .range([0, this.width])
-
-    this.y = d3.scale.linear()
-        .domain([99, 0])
-        .range([this.height, 0])
-
-    this.yAxis = d3.svg.axis()
-        .scale(this.y)
-        .orient("left")
-
-    this.area = d3.svg.area()
-        .interpolate("monotone")
-        .x0(0)
-        .x1(function(d) { return that.x(d); })
-        .y(function(d, i) { return that.y(i); })
-
-    this.svg.append("g")
-        .attr("class", "y axis")
-        // .attr("transform", )
+    this.svg.append("path")
+        .datum(topojson.mesh(that.mapData, that.mapData.objects.states, function(a, b) { return a !== b; }))
+        .attr("class", "states")
+        .attr("d", path);
 
     // call the update method
     this.updateVis();
@@ -71,33 +61,35 @@ MapVis.prototype.initVis = function(){
  * Method to wrangle the data. In this case it takes an options object
  * @param _filterFunction - a function that filters data or "null" if none
  */
-MapVis.prototype.wrangleData = function(_filterFunction){
-    this.displayData = this.filterAndAggregate(_filterFunction);
+MapVis.prototype.wrangleData = function() {
+    this.displayData = this.filterAndAggregate();
 }
 
 /**
  * the drawing function - should use the D3 selection, enter, exit
  */
 MapVis.prototype.updateVis = function() {
-    var max_count = d3.max(this.displayData, function(d) { return d; })
-    this.x.domain([0, max_count])
 
-    this.svg.select(".y.axis")
-        .call(this.yAxis)
+    var that = this
 
-    var path = this.svg.selectAll(".area")
-        .data([this.displayData])
+    that.svg.selectAll('.node').remove()
 
-    path.enter()
-        .append("path")
-        .attr("class", "area");
+    var max = d3.max(that.displayData, function(d){ console.log(d); return d["All"] })
+    var min = d3.min(that.displayData, function(d){ return d["All"] })
 
-    path
-        .transition()
-        .attr("d", this.area)
+    var radius = d3.scale.linear()
+        .domain([min, max])
+        .range([0, 12])
 
-    path.exit()
-        .remove();
+    that.svg.selectAll(".node")
+        .data(that.displayData)
+        .enter().append("g")
+            .attr("class", "node")
+        .append("circle")
+        .attr("r", function(d){return radius(d["All"])})
+        .attr("cx", function(d){return d.x})
+        .attr("cy", function(d){return d.y})
+        .attr("fill", "steelblue")    
 }
 
 /**
@@ -106,11 +98,9 @@ MapVis.prototype.updateVis = function() {
  * be defined here.
  * @param selection
  */
-MapVis.prototype.onSelectionChange = function(selectionStart, selectionEnd) {
+MapVis.prototype.onSelectionChange = function(_vars) {
     console.log("entered MapVis selection")
-    // TODO: call wrangle function
-    this.start = selectionStart;
-    this.end = selectionEnd;
+    this.month = _vars.month
 
     this.wrangleData(null);
     this.updateVis();
@@ -129,27 +119,31 @@ MapVis.prototype.onSelectionChange = function(selectionStart, selectionEnd) {
  * @param _filter - A filter can be, e.g.,  a function that is only true for data of a given time range
  * @returns {Array|*}
  */
-MapVis.prototype.filterAndAggregate = function(_filter) {
-    var filter = function() { return true; }
-    if (_filter != null){
-        filter = _filter;
-    }
+MapVis.prototype.filterAndAggregate = function() {
 
     var that = this;
-    var index = 0
 
-    var res = d3.range(100).map(function() {
-        var count = 0
-        var filtered = (that.data).filter(function(d) { 
-            return d.time >= that.start && d.time < that.end
-        })
-        filtered.map(function(d) {
-            count += d.ages[index];
-        })
-        index += 1
-        return count
-    });
+    var filteredData = this.realData.map(function(d) {
+        var tmp = d.city.split(", ")
+        for (i=0; i < 227; i ++) {
+            if (d.months[i].month == that.month) {
+                return {
+                    'City': tmp[0],
+                    'State': tmp[1],
+                    '1br': d.months[i]["1br"],
+                    '2br': d.months[i]["2br"],
+                    '3br': d.months[i]["3br"],
+                    '4br': d.months[i]["4br"],
+                    '5br': d.months[i]["5br"],
+                    'All': d.months[i]["allhomes"],
+                    'x': that.projection([d.latitude, d.longitude])[0],
+                    'y': that.projection([d.latitude, d.longitude])[1]
+                }
+            }
+        }
+    })
 
-    return res;
+    return filteredData;
+
 }
 
