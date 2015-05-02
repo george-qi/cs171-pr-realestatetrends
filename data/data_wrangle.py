@@ -91,8 +91,8 @@ def add_coordinates(fname,df):
 		if len(city_index) > 0:
 			city_index = city_index[0]
 
-			df[city_index]['longitude'] = row[1]
-			df[city_index]['latitude'] = row[2]
+			df[city_index]['longitude'] = row[2]
+			df[city_index]['latitude'] = row[1]
 
 	return df
 
@@ -106,7 +106,7 @@ for f in files:
 data = add_coordinates('coordinates',data)
 
 # save json file
-with open('data.json', 'w') as outfile:
+with open('data_edited.json', 'w') as outfile:
     json.dump(data, outfile)
 
 # open json file
