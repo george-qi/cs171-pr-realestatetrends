@@ -107,8 +107,6 @@ TableVis.prototype.wrangleData = function() {
 TableVis.prototype.updateVis = function() {
     var that = this;
 
-    console.log(that.displayData)
-
     d3.selectAll("table").remove()
 
     var table = d3.select("body").append("table")
