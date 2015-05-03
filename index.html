@@ -22,7 +22,11 @@
     <!-- add own vis classes-->
     <script src = "js/tableview.js"></script>
     <script src = "js/mapview.js"></script>
+<<<<<<< HEAD
     <script src = "js/choropleth.js"></script>
+=======
+    <script src = "js/lineview.js"></script>
+>>>>>>> b39ce1337c96df49c8de053b278c0e459113ddc2
 
     <!-- add own stylesheet-->
     <link rel="stylesheet" type="text/css" href="css/myStyle.css">
@@ -64,7 +68,7 @@
     </div>
 
     <div class="row">
-      <div class="col-md-12" id="prioVis">
+      <div class="col-md-12" id="lineVis">
       </div>
     </div>
   </div>
@@ -87,15 +91,20 @@ var vars = {
 var dateFormatter = d3.time.format("%Y-%m-%d");
 
 var initVis = function() {
-  var map_vis = new MapVis(d3.select("#mapVis"), mapData, realData, vars)
+  var map_vis = new MapVis(d3.select("#mapVis"), MyEventHandler, mapData, realData, vars)
   var table_vis = new TableVis(d3.select("#tableVis"), realData, vars)
   var choropleth_vis = new ChoroplethVis(d3.select("#chlroplethVis"), mapData, realData, vars)
+  var line_vis = new LineVis(d3.select("#lineVis"), realData, vars)
 
   $(MyEventHandler).bind("selectionChanged", function(event) {
     // document.getElementById('monthInfo').innerHTML = dateFormatter(selectionStart) + " -> " + dateFormatter(selectionEnd)
     map_vis.onSelectionChange(vars);
     table_vis.onSelectionChange(vars);
     choropleth_vis.onSelectionChange(vars);
+  });
+
+  $(MyEventHandler).bind("nodeHover", function(event, city) {
+    line_vis.onSelectionChange(city, vars);
   });
 }
 

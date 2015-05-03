@@ -2,8 +2,9 @@
  * CS171 Project: George Qi, Jacob Kim, and Lawrence Kim
  */
 
-MapVis = function(_parentElement, _mapData, _realData, _vars) {
+MapVis = function(_parentElement, _eventHandler, _mapData, _realData, _vars) {
     this.parentElement = _parentElement;
+    this.eventHandler = _eventHandler;
     this.mapData = _mapData
     this.realData = _realData;
     this.month = _vars.month;
@@ -29,7 +30,7 @@ MapVis.prototype.initVis = function() {
 
     var that = this;
     
-    this.wrangleData(null);
+    this.displayData = this.filterAndAggregate();
 
     // filter, aggregate, modify data
     this.svg = this.parentElement.append("svg")
@@ -56,25 +57,16 @@ MapVis.prototype.initVis = function() {
     this.updateVis();
 }
 
-
-/**
- * Method to wrangle the data. In this case it takes an options object
- * @param _filterFunction - a function that filters data or "null" if none
- */
-MapVis.prototype.wrangleData = function() {
-    this.displayData = this.filterAndAggregate();
-}
-
 /**
  * the drawing function - should use the D3 selection, enter, exit
  */
 MapVis.prototype.updateVis = function() {
 
-    var that = this
+    var that = this;
 
     that.svg.selectAll('.node').remove()
 
-    var max = d3.max(that.displayData, function(d){ console.log(d); return d["All"] })
+    var max = d3.max(that.displayData, function(d){ return d["All"] })
     var min = d3.min(that.displayData, function(d){ return d["All"] })
 
     var radius = d3.scale.linear()
@@ -86,10 +78,13 @@ MapVis.prototype.updateVis = function() {
         .enter().append("g")
             .attr("class", "node")
         .append("circle")
-        .attr("r", function(d){return radius(d["All"])})
-        .attr("cx", function(d){return d.x})
-        .attr("cy", function(d){return d.y})
+        .attr("r", function(d){ return radius(d["All"]); })
+        .attr("cx", function(d){ return d.x; })
+        .attr("cy", function(d){ return d.y; })
         .attr("fill", "steelblue")    
+        .on("mouseover", function(d) {
+            $(that.eventHandler).trigger("nodeHover", d.City)
+        })
 }
 
 /**
@@ -102,7 +97,7 @@ MapVis.prototype.onSelectionChange = function(_vars) {
     console.log("entered MapVis selection")
     this.month = _vars.month
 
-    this.wrangleData(null);
+    this.displayData = this.filterAndAggregate();
     this.updateVis();
 }
 
