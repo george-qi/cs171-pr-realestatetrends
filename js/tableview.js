@@ -44,8 +44,11 @@ TableVis.prototype.initVis = function() {
     //     .append("g")
     //         .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
 
-    var table = d3.select("body").append("table")
-        .attr("style", "margin-left: 250px"),
+    var table = d3.select("body").append("div")
+        .attr("class","scroll")
+        .append("table")
+        .attr("style", "margin-left: 250px")
+        .attr("class", "tableSection"),
         thead = table.append("thead").attr("class", "thead");
         tbody = table.append("tbody");
     
