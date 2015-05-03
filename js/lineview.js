@@ -5,7 +5,7 @@
 LineVis = function(_parentElement, _realData, _vars) {
     this.parentElement = _parentElement;
     this.realData = _realData;
-    this.month = _vars.month;
+    this.month = "1996-04";
     this.filter = _vars.filter
     this.displayData = [];
     this.city = "New York"; 
@@ -83,8 +83,10 @@ LineVis.prototype.updateVis = function() {
     if (max_price < that.average_max) max_price = that.average_max;
     this.y.domain([0, max_price])
 
+    console.log(that.displayData)
+
     var line = d3.svg.line()
-        .x(function(d) { return that.x(d["date"]); })
+        .x(function(d) { console.log(that.x(d["date"])); return that.x(d["date"]); })
         .y(function(d) { return that.y(d["price"]); })
 
     var line2 = d3.svg.line()
@@ -133,9 +135,7 @@ LineVis.prototype.updateVis = function() {
  * @param selection
  */
 LineVis.prototype.onSelectionChange = function(_city, _vars) {
-    this.month = _vars.month
     this.city = _city;
-
     this.displayData = this.filterAndAggregate();
     this.updateVis();
 }
@@ -155,8 +155,6 @@ LineVis.prototype.onSelectionChange = function(_city, _vars) {
  */
 LineVis.prototype.filterAndAggregate = function() {
     var that = this;
-
-    console.log("tryna filterAndAggregate")
 
     var filtered = (that.realData).filter(function(d) {
         var tmp = d.city.split(", ")
