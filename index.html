@@ -22,6 +22,7 @@
     <!-- add own vis classes-->
     <script src = "js/tableview.js"></script>
     <script src = "js/mapview.js"></script>
+    <script src = "js/choropleth.js"></script>
 
     <!-- add own stylesheet-->
     <link rel="stylesheet" type="text/css" href="css/myStyle.css">
@@ -88,11 +89,13 @@ var dateFormatter = d3.time.format("%Y-%m-%d");
 var initVis = function() {
   var map_vis = new MapVis(d3.select("#mapVis"), mapData, realData, vars)
   var table_vis = new TableVis(d3.select("#tableVis"), realData, vars)
+  var choropleth_vis = new ChoroplethVis(d3.select("#chlroplethVis"), mapData, realData, vars)
 
   $(MyEventHandler).bind("selectionChanged", function(event) {
     // document.getElementById('monthInfo').innerHTML = dateFormatter(selectionStart) + " -> " + dateFormatter(selectionEnd)
     map_vis.onSelectionChange(vars);
     table_vis.onSelectionChange(vars);
+    choropleth_vis.onSelectionChange(vars);
   });
 }
 
