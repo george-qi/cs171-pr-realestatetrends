@@ -78,7 +78,7 @@ MapVis.prototype.updateVis = function() {
         .enter().append("g")
             .attr("class", "node")
         .append("circle")
-        .attr("r", function(d){return radius(d[that.mapdisplay]); })
+        .attr("r", function(d){ return radius(d[that.mapdisplay]); })
         .attr("cx", function(d){ return d.x; })
         .attr("cy", function(d){ return d.y; })
         .on("mouseover", function(d) {
@@ -123,7 +123,6 @@ MapVis.prototype.filterAndAggregate = function() {
         var tmp = d.city.split(", ")
         for (i=0; i < 227; i ++) {
             if (d.months[i].month == that.month) {
-                console.log(d)
                 return {
                     'City': tmp[0],
                     'State': tmp[1],
