@@ -22,12 +22,21 @@
     <!-- add own vis classes-->
     <script src = "js/tableview.js"></script>
     <script src = "js/mapview.js"></script>
-    <script src = "js/choropleth.js"></script>
     <script src = "js/lineview.js"></script>
 
     <!-- add own stylesheet-->
     <link rel="stylesheet" type="text/css" href="css/myStyle.css">
-
+    <style>
+  .node {
+    fill: steelblue;
+    stroke: #000;
+    stroke-width: .9px;
+    stroke-opacity: 0.4;
+  }
+  .node:hover {
+    fill: red;
+  }
+</style>
   </head>
   <body>
     <div class="container">
@@ -54,6 +63,13 @@
       <div class="col-md-8">
         <b>Current Month: </b> <span id="monthInfo"></span>
         Time Update: <input type="range" name="yearmonth" min="23956" max="24182" step="1" value="0" id="slider" oninput = ";"> <br>
+        <b>Housing Data to Display: </b>
+          <label><input type="radio" name="mapfilter" value="All" onchange="mapfilter(this.value)" checked></label> All Homes
+          <label><input type="radio" name="mapfilter" value="1br" onchange="mapfilter(this.value)"></label> 1BR
+          <label><input type="radio" name="mapfilter" value="2br" onchange="mapfilter(this.value)"></label> 2BR
+          <label><input type="radio" name="mapfilter" value="3br" onchange="mapfilter(this.value)"></label> 3BR
+          <label><input type="radio" name="mapfilter" value="4br" onchange="mapfilter(this.value)"></label> 4BR
+          <label><input type="radio" name="mapfilter" value="5br" onchange="mapfilter(this.value)"></label> 5BR
       </div>
     </div>
 
@@ -82,7 +98,8 @@ var econData;
 var MyEventHandler = new Object();
 var vars = {
   'month': "1996-04",
-  'filter': [] 
+  'filter': [],
+  'mapdisplay': 'All' 
 }
 
 var dateFormatter = d3.time.format("%Y-%m-%d");
@@ -90,19 +107,25 @@ var dateFormatter = d3.time.format("%Y-%m-%d");
 var initVis = function() {
   var map_vis = new MapVis(d3.select("#mapVis"), MyEventHandler, mapData, realData, vars)
   var table_vis = new TableVis(d3.select("#tableVis"), realData, vars)
-  var choropleth_vis = new ChoroplethVis(d3.select("#chlroplethVis"), mapData, realData, vars)
   var line_vis = new LineVis(d3.select("#lineVis"), realData, vars)
 
   $(MyEventHandler).bind("selectionChanged", function(event) {
     // document.getElementById('monthInfo').innerHTML = dateFormatter(selectionStart) + " -> " + dateFormatter(selectionEnd)
-    map_vis.onSelectionChange(vars);
     table_vis.onSelectionChange(vars);
-    choropleth_vis.onSelectionChange(vars);
   });
 
-  $(MyEventHandler).bind("nodeHover", function(event, city) {
-    line_vis.onSelectionChange(city, vars);
+  $(MyEventHandler).bind("mapChanged", function(event){
+    map_vis.onSelectionChange(vars);
   });
+
+  $(MyEventHandler).bind("nodeHover", function(event, node) {
+    line_vis.onSelectionChange(node.City, vars);
+    map_vis.descriptions(node);
+  });
+
+  $(MyEventHandler).bind("nodedeHover", function(event, node){
+    map_vis.removedescriptions();
+  })
 }
 
 // call this function after both files are loaded -- error should be "null" if no error
@@ -158,6 +181,21 @@ function update_filters(value, add) {
   
   $(MyEventHandler).trigger("selectionChanged")
 }
+
+function mapfilter(d){
+  vars.mapdisplay = d;
+  $(MyEventHandler).trigger("mapChanged")
+
+
+}
+
+function nonhover(d){
+  }
+
+function hover(d){
+  }
+
+
 
 </script>
 </body>

@@ -83,10 +83,8 @@ LineVis.prototype.updateVis = function() {
     if (max_price < that.average_max) max_price = that.average_max;
     this.y.domain([0, max_price])
 
-    console.log(that.displayData)
-
     var line = d3.svg.line()
-        .x(function(d) { console.log(that.x(d["date"])); return that.x(d["date"]); })
+        .x(function(d) { return that.x(d["date"]); })
         .y(function(d) { return that.y(d["price"]); })
 
     var line2 = d3.svg.line()
