@@ -123,6 +123,7 @@ MapVis.prototype.filterAndAggregate = function() {
         var tmp = d.city.split(", ")
         for (i=0; i < 227; i ++) {
             if (d.months[i].month == that.month) {
+                console.log(d)
                 return {
                     'City': tmp[0],
                     'State': tmp[1],
@@ -132,8 +133,8 @@ MapVis.prototype.filterAndAggregate = function() {
                     '4br': d.months[i]["4br"],
                     '5br': d.months[i]["5br"],
                     'All': d.months[i]["allhomes"],
-                    'x': that.projection([d.latitude, d.longitude])[0],
-                    'y': that.projection([d.latitude, d.longitude])[1]
+                    'x': that.projection([d.longitude, d.latitude])[0],
+                    'y': that.projection([d.longitude, d.latitude])[1]
                 }
             }
         }
