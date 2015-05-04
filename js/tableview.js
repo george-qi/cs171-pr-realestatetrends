@@ -95,7 +95,6 @@ TableVis.prototype.initVis = function() {
  * @param _filterFunction - a function that filters data or "null" if none
  */
 TableVis.prototype.wrangleData = function() {
-
     var array = ['City', 'State', 'All', '1br', '2br', '3br', '4br', '5br']
     var has_filter = ['City', 'State']
     this.vars.columns = this.vars.filter.length == 0 ? array : has_filter.concat(this.vars.filter)
@@ -109,7 +108,6 @@ TableVis.prototype.wrangleData = function() {
  */
 TableVis.prototype.updateVis = function() {
     var that = this;
-
     d3.selectAll("table").remove()
 
     var table = d3.select("body").append("table")
@@ -161,7 +159,6 @@ TableVis.prototype.updateVis = function() {
  * @param selection
  */
 TableVis.prototype.onSelectionChange = function(_vars) {
-
     this.vars.month = _vars.month;
     this.vars.filter = _vars.filter;
 
@@ -183,12 +180,11 @@ TableVis.prototype.onSelectionChange = function(_vars) {
  * @returns {Array|*}
  */
 TableVis.prototype.filterAndAggregate = function(yearmonth) {
-
     var that = this;    
 
     var filteredData = this.data.map(function(d) {
         var tmp = d.city.split(", ")
-        for (i=0; i < 227; i ++) {
+        for (i=0; i < 227; i++) {
             if (d.months[i].month == that.vars.month) {
                 return {
                     'City': tmp[0],

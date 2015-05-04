@@ -6,13 +6,15 @@ LineVis = function(_parentElement, _realData, _vars) {
     this.parentElement = _parentElement;
     this.realData = _realData;
     this.month = "1996-04";
-    this.filter = _vars.filter
+    this.current_month = _vars.month;
+    this.current_regprice = 0;
+    this.current_avgprice = 0;
     this.displayData = [];
     this.city = "New York"; 
 
-    this.margin = {top: 20, right: 20, bottom: 30, left: 20}
-    this.width = 730 - this.margin.left - this.margin.right
-    this.height = 450 - this.margin.top - this.margin.bottom
+    this.margin = {top: 20, right: 20, bottom: 30, left: 50}
+    this.width = 450 - this.margin.left - this.margin.right
+    this.height = 250 - this.margin.top - this.margin.bottom
 
     this.averageData = this.calcAverages();
     this.average_max = d3.max(this.averageData, function(d) { return d["allhomes"]; })
@@ -24,9 +26,7 @@ LineVis = function(_parentElement, _realData, _vars) {
  * Method that sets up the SVG and the variables
  */
 LineVis.prototype.initVis = function() {
-
     var that = this;
-    
     this.displayData = this.filterAndAggregate();
 
     // filter, aggregate, modify data
@@ -40,7 +40,7 @@ LineVis.prototype.initVis = function() {
 
     this.x = d3.time.scale()
         .domain([new Date(1996, 4, 1), new Date(2015, 2, 1)])
-        .range([0, this.width])
+        .range([0, that.width])
 
     this.y = d3.scale.linear()
         .range([this.height, 0])
@@ -74,23 +74,32 @@ LineVis.prototype.initVis = function() {
  * the drawing function - should use the D3 selection, enter, exit
  */
 LineVis.prototype.updateVis = function() {
-
     var that = this;
     that.svg.selectAll('.line').remove();
     that.svg.selectAll('.label').remove();
+    that.svg.selectAll('circle').remove();
 
     var max_price = d3.max(this.displayData, function(d) { return d.price; })
     if (max_price < that.average_max) max_price = that.average_max;
     this.y.domain([0, max_price])
 
-    console.log(that.displayData)
+    var time = that.current_month.split("-")
+    var current_date = new Date(Number(time[0]), Number(time[1]), 1)
 
     var line = d3.svg.line()
-        .x(function(d) { console.log(that.x(d["date"])); return that.x(d["date"]); })
+        .x(function(d) { 
+            if (d["date"].getTime() == current_date.getTime())
+                that.current_regprice = d["price"];
+            return that.x(d["date"]); 
+        })
         .y(function(d) { return that.y(d["price"]); })
 
     var line2 = d3.svg.line()
-        .x(function(d) { return that.x(d["date"]); })
+        .x(function(d) { 
+            if (d["date"].getTime() == current_date.getTime())
+                that.current_avgprice = d["allhomes"];
+            return that.x(d["date"]); 
+        })
         .y(function(d) { return that.y(d["allhomes"]); })
 
     this.svg.select(".x.axis")
@@ -103,13 +112,11 @@ LineVis.prototype.updateVis = function() {
         .datum(that.displayData)
         .attr("class", "line")
         .attr("d", line)
-        .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
 
     this.svg.append("path")
         .datum(that.averageData)
         .attr("class", "line")
         .attr("d", line2)
-        .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
 
     this.svg.append("text")
         .attr("class", "label")
@@ -126,6 +133,27 @@ LineVis.prototype.updateVis = function() {
         .attr("text-anchor", "start")
         .style("fill", "red")
         .text("Average City Price")
+
+    var marker = this.svg.append("circle")
+        .attr("r", 5)
+        .style("fill", "#FFFFFF")
+        .style("stroke", "#FB5050")
+        .style("stroke-width", "3px")
+
+    var avg_marker = this.svg.append("circle")
+        .attr("r", 5)
+        .style("fill", "#FFFFFF")
+        .style("stroke", "#FB5050")
+        .style("stroke-width", "3px")
+
+    marker
+        .transition()
+        .attr("cx", that.x(current_date))
+        .attr("cy", that.y(that.current_regprice))
+    avg_marker
+        .transition()
+        .attr("cx", that.x(current_date))
+        .attr("cy", that.y(that.current_avgprice))
 }
 
 /**
@@ -134,8 +162,9 @@ LineVis.prototype.updateVis = function() {
  * be defined here.
  * @param selection
  */
-LineVis.prototype.onSelectionChange = function(_city, _vars) {
-    this.city = _city;
+LineVis.prototype.onSelectionChange = function(_vars) {
+    this.current_month = _vars.month
+    this.city = _vars.city;
     this.displayData = this.filterAndAggregate();
     this.updateVis();
 }
@@ -167,8 +196,9 @@ LineVis.prototype.filterAndAggregate = function() {
         var year = Number(time[0]) + Math.floor((d+3)/12)
         var month = (Number(time[1]) + d) % 12
         if (month == 0) month = 12
+
         return {
-            date: new Date(year, month),
+            date: new Date(year, month, 1),
             price: filtered[0].months[d]["allhomes"]
         }
     })
@@ -215,7 +245,7 @@ LineVis.prototype.calcAverages = function() {
         if (month == 0) month = 12
 
         return {
-            "date": new Date(year, month),
+            "date": new Date(year, month, 1),
             "1br": prices[0] / counts[0],
             "2br": prices[1] / counts[1],
             "3br": prices[2] / counts[2],
