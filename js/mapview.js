@@ -54,7 +54,6 @@ MapVis.prototype.initVis = function() {
         .attr("class", "states")
         .attr("d", path);
 
-    // call the update method
     this.updateVis();
 }
 
@@ -83,8 +82,8 @@ MapVis.prototype.updateVis = function() {
         .attr("cx", function(d){ return d.x; })
         .attr("cy", function(d){ return d.y; })
         .on("mouseover", function(d) {
-            hover(d);
-            $(that.eventHandler).trigger("nodeHover", d);
+            $(that.eventHandler).trigger("mapHover", d);
+            $(that.eventHandler).trigger("nodeHover", [d.City, d.State])
         })
         .on("mouseout", function(d){
             $(that.eventHandler).trigger("nodedeHover", d);
@@ -98,10 +97,8 @@ MapVis.prototype.updateVis = function() {
  * @param selection
  */
 MapVis.prototype.onSelectionChange = function(_vars) {
-    console.log("entered MapVis selection")
     this.month = _vars.month
     this.mapdisplay = _vars.mapdisplay
-
     this.displayData = this.filterAndAggregate();
     this.updateVis();
 }
@@ -120,10 +117,9 @@ MapVis.prototype.onSelectionChange = function(_vars) {
  * @returns {Array|*}
  */
 MapVis.prototype.filterAndAggregate = function() {
-
     var that = this;
 
-    var filteredData = this.realData.map(function(d) {
+    return this.realData.map(function(d) {
         var tmp = d.city.split(", ")
         for (i=0; i < 227; i ++) {
             if (d.months[i].month == that.month) {
@@ -142,9 +138,6 @@ MapVis.prototype.filterAndAggregate = function() {
             }
         }
     })
-
-    return filteredData;
-
 }
 
 // TO DRAW THE TEXT STUFF UPON HOVERING

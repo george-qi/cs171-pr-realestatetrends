@@ -106,7 +106,7 @@ for f in files:
 data = add_coordinates('coordinates',data)
 
 # save json file
-with open('data_edited.json', 'w') as outfile:
+with open('data_v2.json', 'w') as outfile:
     json.dump(data, outfile)
 
 # open json file

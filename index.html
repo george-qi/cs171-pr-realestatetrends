@@ -23,6 +23,8 @@
     <script src = "js/tableview.js"></script>
     <script src = "js/mapview.js"></script>
     <script src = "js/lineview.js"></script>
+    <script src = "js/gdpview.js"></script>
+    <script src = "js/histview.js"></script>
 
     <!-- add own stylesheet-->
     <link rel="stylesheet" type="text/css" href="css/myStyle.css">
@@ -77,11 +79,19 @@
       <div class="col-md-8" id="mapVis">
       </div>
       <div class="col-md-4" id="tableVis">
+        <!-- placeholder -->
+          <svg width="230" height="450" style="background-color: lightcoral">
+            <text x="50" y="50">HERE should be Table</text>
+          </svg>
       </div>
     </div>
 
     <div class="row">
-      <div class="col-md-12" id="lineVis">
+      <div class="col-md-4" id="lineVis">
+      </div>
+      <div class="col-md-4" id="gdpVis">
+      </div>
+      <div class="col-md-4" id="histVis">
       </div>
     </div>
   </div>
@@ -95,11 +105,14 @@
 var mapData;
 var realData;
 var econData;
+var stateGdpData;
 var MyEventHandler = new Object();
 var vars = {
   'month': "1996-04",
   'filter': [],
-  'mapdisplay': 'All' 
+  'mapdisplay': 'All', 
+  'city': "New York",
+  'state': "NY"
 }
 
 var dateFormatter = d3.time.format("%Y-%m-%d");
@@ -108,18 +121,36 @@ var initVis = function() {
   var map_vis = new MapVis(d3.select("#mapVis"), MyEventHandler, mapData, realData, vars)
   var table_vis = new TableVis(d3.select("#tableVis"), realData, vars)
   var line_vis = new LineVis(d3.select("#lineVis"), realData, vars)
+  var gdp_vis = new GdpVis(d3.select("#gdpVis"), econData, stateGdpData, vars)
+  var hist_vis = new HistVis(d3.select("#histVis"), realData, vars)
 
+  // when you move the time scroller
   $(MyEventHandler).bind("selectionChanged", function(event) {
     // document.getElementById('monthInfo').innerHTML = dateFormatter(selectionStart) + " -> " + dateFormatter(selectionEnd)
     table_vis.onSelectionChange(vars);
+    line_vis.onSelectionChange(vars);
+    hist_vis.onSelectionChange(vars);
+    map_vis.onSelectionChange(vars);
   });
 
   $(MyEventHandler).bind("mapChanged", function(event){
     map_vis.onSelectionChange(vars);
   });
 
-  $(MyEventHandler).bind("nodeHover", function(event, node) {
-    line_vis.onSelectionChange(node.City, vars);
+  $(MyEventHandler).bind("tableFilter", function(event) {
+    table_vis.onSelectionChange(vars);
+    hist_vis.onSelectionChange(vars);
+  })
+
+  // when you hover over a node
+  $(MyEventHandler).bind("nodeHover", function(event, city, state) {
+    vars.city = city;
+    vars.state = state;
+    line_vis.onSelectionChange(vars);
+    gdp_vis.onSelectionChange(vars);
+  });
+
+  $(MyEventHandler).bind("mapHover", function(event, node) {
     map_vis.descriptions(node);
   });
 
@@ -129,7 +160,7 @@ var initVis = function() {
 }
 
 // call this function after both files are loaded -- error should be "null" if no error
-var dataLoaded = function (error, _mapData, _realData, _econData) {
+var dataLoaded = function (error, _mapData, _realData, _econData, _stateGdpData) {
   if (!error) {
     // console.log(_mapData)
     array = []
@@ -139,6 +170,7 @@ var dataLoaded = function (error, _mapData, _realData, _econData) {
     realData = array;
     mapData = _mapData;
     econData = _econData;
+    stateGdpData = _stateGdpData;
 
     initVis(vars.month);
   }
@@ -149,6 +181,7 @@ var startHere = function() {
     .defer(d3.json, "us.json")
     .defer(d3.json, "data/data.json")
     .defer(d3.json, "data/econdata.json")
+    .defer(d3.json, "data/state_gdp.json")
     .await(dataLoaded)
 }
 
@@ -179,7 +212,7 @@ function update_filters(value, add) {
       vars.filter.splice(index, 1);
   }
   
-  $(MyEventHandler).trigger("selectionChanged")
+  $(MyEventHandler).trigger("tableFilter")
 }
 
 function mapfilter(d){
