@@ -63,7 +63,6 @@ MapVis.prototype.initVis = function() {
 MapVis.prototype.updateVis = function() {
 
     var that = this;
-    console.log(that.mapdisplay)
     that.svg.selectAll('.node').remove()
 
     var max = d3.max(that.displayData, function(d){ return d[that.mapdisplay] })
@@ -144,7 +143,6 @@ MapVis.prototype.filterAndAggregate = function() {
 
 // To draw descriptions upon hovering over Nodes
 MapVis.prototype.descriptions = function(d){
-    console.log(d);
     var that = this;
     var City = d.City.length + 2 + d.State.length
     var Description
@@ -155,7 +153,6 @@ MapVis.prototype.descriptions = function(d){
         Description = d[that.mapdisplay].toString().length + 5
     } 
     var maxchars = d3.max([City, Description])
-    console.log(maxchars);
     that.svg.append("rect")
         .attr("x", d.x)
         .attr("y", d.y)
@@ -201,7 +198,6 @@ MapVis.prototype.addSearchBubble = function(word){
 
     var searchedcity = word.split(", ")[0]
     var d = d3.select('#mapVis').select("#"+searchedcity.toString().replace(/\./g,' ').replace(/\s/g, ''));
-    console.log(d);
     if(d[0][0] == null){
         return
     }

@@ -226,6 +226,7 @@ LineVis.prototype.filterAndAggregate = function() {
     return periods;
 }
 
+// Create Averaged Data
 LineVis.prototype.calcAverages = function() {
     var that = this;
     var time = that.month.split("-")

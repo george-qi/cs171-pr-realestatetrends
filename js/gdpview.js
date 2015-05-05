@@ -213,6 +213,7 @@ GdpVis.prototype.filterAndAggregate = function() {
     })
 }
 
+//Creates the average Data
 GdpVis.prototype.calcAverages = function() {
     var that = this;
     var time = that.month.split("-")

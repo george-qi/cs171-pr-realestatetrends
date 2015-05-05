@@ -194,6 +194,7 @@ TableVis.prototype.filterAndAggregate = function(yearmonth) {
     })
 }
 
+//Creates row data
 TableVis.prototype.row_data = function(row, i) {
     return vars.columns.map(function(column, i) {
         if(i == 0 || i == 1) 
@@ -204,6 +205,7 @@ TableVis.prototype.row_data = function(row, i) {
     });
 }
 
+//Sorting data based on which header is clicked
 function sort_by(header, vars) {
     vars.sort_by.column = header;
     var is_sorted = vars.sort_by.is_sorted;
@@ -226,7 +228,7 @@ function sort_by(header, vars) {
     }
 }
 
-
+// Sort upon Clicking on Header (calls sort_by)
 function click_header(header, vars) {
     var this_node = d3.selectAll("th").filter(function(d) {
         return d == header;
@@ -254,6 +256,7 @@ function click_header(header, vars) {
     sort_by(header, vars);
 }
 
+// Make Table Striped
 function paint_zebra_rows(rows) {
     rows.filter(function() {
         return d3.select(this).style("display") != "none";
