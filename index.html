@@ -91,19 +91,6 @@
   #mapVis {
     position: relative;
   }
-  /*
-  .searchbubble:after {
-    content: "";
-    position: absolute;
-    width: 0;
-    height: 0;
-    border-width: 10px;
-    border-style: solid;
-    border-color: lightgray transparent transparent transparent;
-    top: 110px;
-    left: 82px;
-  }
-  */
 
 </style>
   </head>
@@ -192,6 +179,7 @@ var vars = {
 var dateFormatter = d3.time.format("%m-%Y");
 document.getElementById('monthInfo').innerHTML = vars.month
 
+// Initialize the Visualization
 var initVis = function() {
   var map_vis = new MapVis(d3.select("#mapVis"), MyEventHandler, mapData, realData, vars)
   var table_vis = new TableVis(d3.select("#tableVis"), realData, vars)
@@ -209,11 +197,13 @@ var initVis = function() {
     gdp_vis.onSelectionChange(vars);
   });
 
+  //Upon Hovering over a node (Coexists with the "nodeHover" event)
   $(MyEventHandler).bind("mapChanged", function(event){
     map_vis.onSelectionChange(vars);
     line_vis.onSelectionChange(vars);
   });
 
+  //Event Handler for Filtering Table
   $(MyEventHandler).bind("tableFilter", function(event) {
     table_vis.onSelectionChange(vars);
     hist_vis.onSelectionChange(vars);
@@ -227,10 +217,12 @@ var initVis = function() {
     gdp_vis.onSelectionChange(vars);
   });
 
+  // For creating the small descriptions upon hovering over a node
   $(MyEventHandler).bind("mapHover", function(event, node) {
     map_vis.descriptions(node);
   });
 
+  // 
   $(MyEventHandler).bind("Search", function(event, word){
     map_vis.addSearchBubble(word);
   });
@@ -244,7 +236,6 @@ var initVis = function() {
 // call this function after both files are loaded -- error should be "null" if no error
 var dataLoaded = function (error, _mapData, _realData, _econData, _stateGdpData) {
   if (!error) {
-    // console.log(_mapData)
     array = []
     for (x in _realData) {
       _realData[x].label = _realData[x].city
@@ -255,7 +246,6 @@ var dataLoaded = function (error, _mapData, _realData, _econData, _stateGdpData)
     econData = _econData;
     stateGdpData = _stateGdpData;
 
-    console.log(realData);
     initVis(vars.month);
     autocomp();
   }
@@ -272,6 +262,8 @@ var startHere = function() {
 
 startHere();
 
+//Upon changing Time Slider
+
 d3.select("#slider").on("input", function(){
   var year = Math.floor(this.value / 12)
   var month = this.value % 12
@@ -284,7 +276,7 @@ d3.select("#slider").on("input", function(){
   $(MyEventHandler).trigger("selectionChanged")
 })
 
-// }) // end entire function
+// Updating Filters for Table
 
 function update_filters(value, add) {
   if(add) {
@@ -300,7 +292,7 @@ function update_filters(value, add) {
   $(MyEventHandler).trigger("tableFilter")
 }
 
-
+//Function for Autocompletion of Search Bar
 function autocomp() {
   $(function() {
     $("#searchField").autocomplete({source: realData
@@ -313,19 +305,20 @@ function autocomp() {
   })
 }
 
-
+//Triggers of Filtering of Map
 function mapfilter(d){
   vars.mapdisplay = d;
   $(MyEventHandler).trigger("mapChanged")
 }
 
+//When Search Button is Clicked
 $("#searchButton").click(function() {
   var searchresult = $("#searchField").val();
   $(MyEventHandler).trigger("Search", searchresult)
 })
 
+//To close description bubble upon finishing search
 function clickeddiv(){
-  console.log("WEFOIJ");
   $(MyEventHandler).trigger("selectionChanged");
 }
 
