@@ -77,6 +77,7 @@ MapVis.prototype.updateVis = function() {
         .data(that.displayData)
         .enter().append("g")
             .attr("class", "node")
+            .attr("id", function(d){ return d.City.toString().replace(/\W+/g,"")})
         .append("circle")
         .attr("r", function(d){ return radius(d[that.mapdisplay]); })
         .attr("cx", function(d){ return d.x; })
@@ -199,7 +200,17 @@ MapVis.prototype.removedescriptions = function(){
 MapVis.prototype.addSearchBubble = function(word){
     this.removeSearchBubble();
     var that = this;
+
     var searchedcity = word.split(", ")[0]
+    var d = d3.select('#mapVis').select("#"+searchedcity.toString().replace(/\W+/g,""));
+    console.log(d);
+    if(d[0][0] == null){
+        return
+    }
+    var searchednode = d[0][0]._data_;
+    var coords = d.attr("transform").substring("10").replace(")","").split(",");
+    console.log(coords)
+    /*
     var relevantindex = -1
     for (x in that.displayData){
         if (that.displayData[x].City == searchedcity){
@@ -210,6 +221,7 @@ MapVis.prototype.addSearchBubble = function(word){
     if (relevantindex == 1){
         return
     }
+    */
     var searchbubble = d3.select("body").append("div")
         .attr("class", "searchbubble")
         .attr("onclick", "clickeddiv()")
@@ -219,17 +231,17 @@ MapVis.prototype.addSearchBubble = function(word){
         "<p>" + word +"</p>" +
         "<div" +  " id=" + "details" + ">" + "<br />" + 
         "Year-Month: " + that.month + "<br />" + 
-        "All Homes: $" + that.displayData[relevantindex].All + "<br />" + 
-        "One Bedroom: $" + that.displayData[relevantindex]['1br'] + "<br />" +
-        "Two Bedrooms: $" + that.displayData[relevantindex]['2br'] + "<br />" + 
-        "Three Bedrooms: $" + that.displayData[relevantindex]['3br'] + "<br />" + 
-        "Four Bedrooms: $" + that.displayData[relevantindex]['4br'] + "<br />" + 
-        "Five or More Bedrooms: $" + that.displayData[relevantindex]['5br'] + "<br />" + 
+        "All Homes: $" + searchednode.All + "<br />" + 
+        "One Bedroom: $" + searchednode['1br'] + "<br />" +
+        "Two Bedrooms: $" + searchednode['2br'] + "<br />" + 
+        "Three Bedrooms: $" + searchednode['3br'] + "<br />" + 
+        "Four Bedrooms: $" + searchednode['4br'] + "<br />" + 
+        "Five or More Bedrooms: $" + searchednode['5br'] + "<br />" + 
         "<div>" + 
         "</div>"  
     )
-    .style("left", (that.displayData[relevantindex].x + 180) + "px")
-    .style("top", (that.displayData[relevantindex].y + 20) + "px");
+    .style("left", (coords[0] + 180) + "px")
+    .style("top", (coords[1] + 20) + "px");
 
     d3.selectAll('.node')
         .classed('.node-described', function(d){return d.City == searchedcity})
