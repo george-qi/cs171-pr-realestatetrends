@@ -97,6 +97,7 @@ MapVis.prototype.updateVis = function() {
  * @param selection
  */
 MapVis.prototype.onSelectionChange = function(_vars) {
+    this.removeSearchBubble();
     this.month = _vars.month
     this.mapdisplay = _vars.mapdisplay
     this.displayData = this.filterAndAggregate();
@@ -193,5 +194,50 @@ MapVis.prototype.removedescriptions = function(){
     var that = this;
     that.svg.selectAll('rect').remove()
     that.svg.selectAll('.citydescription').remove()
+}
+
+MapVis.prototype.addSearchBubble = function(word){
+    this.removeSearchBubble();
+    var that = this;
+    var searchedcity = word.split(", ")[0]
+    var relevantindex = -1
+    for (x in that.displayData){
+        if (that.displayData[x].City == searchedcity){
+            relevantindex = x
+            break;
+        }
+    }
+    if (relevantindex == 1){
+        return
+    }
+    var searchbubble = d3.select("body").append("div")
+        .attr("class", "searchbubble")
+        .attr("onclick", "clickeddiv()")
+        .style("opacity", 0.9)
+
+    searchbubble.html(
+        "<p>" + word +"</p>" +
+        "<div" +  " id=" + "details" + ">" + "<br />" + 
+        "Year-Month: " + that.month + "<br />" + 
+        "All Homes: $" + that.displayData[relevantindex].All + "<br />" + 
+        "One Bedroom: $" + that.displayData[relevantindex]['1br'] + "<br />" +
+        "Two Bedrooms: $" + that.displayData[relevantindex]['2br'] + "<br />" + 
+        "Three Bedrooms: $" + that.displayData[relevantindex]['3br'] + "<br />" + 
+        "Four Bedrooms: $" + that.displayData[relevantindex]['4br'] + "<br />" + 
+        "Five or More Bedrooms: $" + that.displayData[relevantindex]['5br'] + "<br />" + 
+        "<div>" + 
+        "</div>"  
+    )
+    .style("left", (that.displayData[relevantindex].x + 180) + "px")
+    .style("top", (that.displayData[relevantindex].y + 20) + "px");
+
+    d3.selectAll('.node')
+        .classed('.node-described', function(d){return d.City == searchedcity})
+
+}
+
+MapVis.prototype.removeSearchBubble = function(){
+    d3.select(".searchbubble").remove();
+
 }
 
