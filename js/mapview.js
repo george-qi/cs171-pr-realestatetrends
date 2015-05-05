@@ -142,7 +142,7 @@ MapVis.prototype.filterAndAggregate = function() {
     })
 }
 
-// TO DRAW THE TEXT STUFF UPON HOVERING
+// To draw descriptions upon hovering over Nodes
 MapVis.prototype.descriptions = function(d){
     console.log(d);
     var that = this;
@@ -186,6 +186,7 @@ MapVis.prototype.descriptions = function(d){
     node.classed('node-hover', true)
 }
 
+//To remove descriptions upon mouseout from Nodes
 MapVis.prototype.removedescriptions = function(){
     var that = this;
     that.svg.selectAll('rect').remove()
@@ -193,6 +194,7 @@ MapVis.prototype.removedescriptions = function(){
     d3.selectAll('.node').classed("node-hover", false)
 }
 
+//Add Search Bubble upon clicking the Search Button
 MapVis.prototype.addSearchBubble = function(word){
     this.removeSearchBubble();
     var that = this;
@@ -204,18 +206,6 @@ MapVis.prototype.addSearchBubble = function(word){
         return
     }
     var searchednode = d[0][0].__data__;
-    /*
-    var relevantindex = -1
-    for (x in that.displayData){
-        if (that.displayData[x].City == searchedcity){
-            relevantindex = x
-            break;
-        }
-    }
-    if (relevantindex == 1){
-        return
-    }
-    */
     var searchbubble = d3.select('#mapVis').append("div")
         .attr("class", "searchbubble")
         .attr("onclick", "clickeddiv()")
@@ -242,9 +232,9 @@ MapVis.prototype.addSearchBubble = function(word){
 
 }
 
+//Removing the search bubble of descriptions
 MapVis.prototype.removeSearchBubble = function(){
     d3.select(".searchbubble").remove();
-    //d3.selectAll('node').classed("node-described", false)
 
 }
 
