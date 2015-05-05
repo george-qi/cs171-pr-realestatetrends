@@ -42,17 +42,26 @@
   </head>
   <body>
     <div class="container">
-      <h1>CS171 Project</h1>
+      <h1>US Real Estate Trends (1996-2015)</h1>
 
       <div class="row">
         <div class="col-md-8 col-sm-12">
-         <p> The following visualization is a current prototype for our CS171 Project.</p>
+         <p> By Jacob Kim, Lawrence Kim, George Qi</p>
         </div>
 
       </div>
 
       <div class="row">
-      <div class="col-md-4">
+
+
+      <div class="col-md-8">
+        <b>Current Month: </b> <span id="monthInfo"></span>
+        Time Update: <input type="range" name="yearmonth" min="23956" max="24182" step="1" value="0" id="slider" oninput = ";"> <br>
+
+
+      </div>
+
+            <div class="col-md-4">
         Filter By:
         <label><input type="checkbox" name="All" value="All" title="All" onchange="update_filters(this.value, this.checked)"></input>All</label>
         <label><input type="checkbox" name="1br" value="1br" title="1br" onchange="update_filters(this.value, this.checked)"></input>1br</label>
@@ -60,12 +69,14 @@
         <label><input type="checkbox" name="3br" value="3br" title="3br" onchange="update_filters(this.value, this.checked)"></input>3br</label>
         <label><input type="checkbox" name="4br" value="4br" title="4br" onchange="update_filters(this.value, this.checked)"></input>4br</label>
         <label><input type="checkbox" name="5br" value="5br" title="5br" onchange="update_filters(this.value, this.checked)"></input>5br</label>
+    </div>
       </div>
 
-      <div class="col-md-8">
-        <b>Current Month: </b> <span id="monthInfo"></span>
-        Time Update: <input type="range" name="yearmonth" min="23956" max="24182" step="1" value="0" id="slider" oninput = ";"> <br>
-        <b>Housing Data to Display: </b>
+
+
+    <div class="row">
+      <div class="col-md-8" id="mapVis">
+                <b>Housing Data to Display: </b>
           <label><input type="radio" name="mapfilter" value="All" onchange="mapfilter(this.value)" checked></label> All Homes
           <label><input type="radio" name="mapfilter" value="1br" onchange="mapfilter(this.value)"></label> 1BR
           <label><input type="radio" name="mapfilter" value="2br" onchange="mapfilter(this.value)"></label> 2BR
@@ -73,25 +84,19 @@
           <label><input type="radio" name="mapfilter" value="4br" onchange="mapfilter(this.value)"></label> 4BR
           <label><input type="radio" name="mapfilter" value="5br" onchange="mapfilter(this.value)"></label> 5BR
       </div>
-    </div>
-
-    <div class="row">
-      <div class="col-md-8" id="mapVis">
-      </div>
       <div class="col-md-4" id="tableVis">
-        <!-- placeholder -->
-          <svg width="230" height="450" style="background-color: lightcoral">
-            <text x="50" y="50">HERE should be Table</text>
-          </svg>
       </div>
     </div>
 
     <div class="row">
       <div class="col-md-4" id="lineVis">
+        <text class="title"><p><b>Home Value Over Time for Selected City</b></p></text>
       </div>
       <div class="col-md-4" id="gdpVis">
+        <text class="title"><p><b>State GDP Over Time</b></p></text>
       </div>
       <div class="col-md-4" id="histVis">
+        <text class="title"><p><b>Home Value Distribution</b></p></text>
       </div>
     </div>
   </div>

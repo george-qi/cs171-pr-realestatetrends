@@ -44,17 +44,14 @@ TableVis.prototype.initVis = function() {
     //     .append("g")
     //         .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
 
-    var table = d3.select("body").append("div")
-        .attr("class","scroll")
-        .append("table")
-        .attr("style", "margin-left: 250px")
-        .attr("class", "tableSection"),
-        thead = table.append("thead").attr("class", "thead");
-        tbody = table.append("tbody");
+    var table = this.parentElement;
+     table.text("Real Estate Values").style("font-weight", "bold").style("text-align", "center");
+        // .append("table")
+        // .attr("class", "tableSection"),
+        thead = table.append("table").attr("class", "thead");
+        tbody = table.append("div").attr("class","scroll").append("table");
     
-    table.append("caption")
-      .html("Real Estate Prices");
-
+   
     thead.append("tr").selectAll("th")
         .data(that.vars.columns)
     .enter()
@@ -110,13 +107,13 @@ TableVis.prototype.updateVis = function() {
     var that = this;
     d3.selectAll("table").remove()
 
-    var table = d3.select("body").append("table")
-        .attr("style", "margin-left: 250px"),
-        thead = table.append("thead").attr("class", "thead");
-        tbody = table.append("tbody");
+    var table = this.parentElement;
+     table.text("Real Estate Values").style("font-weight", "bold").style("text-align", "center");
+        // .append("table")
+        // .attr("class", "tableSection"),
+        thead = table.append("table").attr("class", "thead");
+        tbody = table.append("div").attr("class","scroll").append("table");
     
-    table.append("caption")
-      .html("Real Estate Prices");
 
     thead.append("tr").selectAll("th")
         .data(that.vars.columns)
