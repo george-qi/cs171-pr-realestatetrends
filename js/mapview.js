@@ -195,13 +195,12 @@ MapVis.prototype.addSearchBubble = function(word){
     var that = this;
 
     var searchedcity = word.split(", ")[0]
-    var d = d3.select('#mapVis').select("#"+searchedcity.toString().replace(/\W+/g,""));
+    var d = d3.select('#mapVis').select("#"+searchedcity.toString().replace(/\./g,' ').replace(/\s/g, ''));
     console.log(d);
     if(d[0][0] == null){
         return
     }
-    var searchednode = d[0][0]._data_;
-    console.log(coords)
+    var searchednode = d[0][0].__data__;
     /*
     var relevantindex = -1
     for (x in that.displayData){
