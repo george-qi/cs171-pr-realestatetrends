@@ -231,7 +231,7 @@ MapVis.prototype.addSearchBubble = function(word){
         "<div>" + 
         "</div>"  
     )
-    .style("left", (searchednode.x + 50) + "px")
+    .style("left", (searchednode.x + 160) + "px")
     .style("top", (searchednode.y ) + "px");
 
     d3.selectAll('.node')
