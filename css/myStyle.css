@@ -1,6 +1,11 @@
 body{
     font-family: 'PT Sans', sans-serif;
 }
+
+.title {
+  text-align: center;
+}
+
 .axis text {
     font: 10px sans-serif;
 }
@@ -77,6 +82,8 @@ h1 {
 
 table {
   border-collapse: collapse;
+  font-size:9px;
+  font-weight: normal;
 }
 
 thead {
@@ -90,6 +97,7 @@ table td, table th, caption {
 
 table th {
   cursor: n-resize;
+  width: 600px;
 }
 
 table th.sorted {
@@ -106,13 +114,15 @@ table tr.odd {
 
 td {
   text-align: right;
+  width: 500px;
 }
-
 
 .scroll {
-    max-height: 300px;
+    max-height: 470px;
     overflow: auto;
 }
+
+
 
 path {
   fill: none;
