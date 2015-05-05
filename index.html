@@ -28,6 +28,7 @@
     <script src = "js/lineview.js"></script>
     <script src = "js/gdpview.js"></script>
     <script src = "js/histview.js"></script>
+    <script src = "js/d3.legend.js"></script>
 
     <!-- add own stylesheet-->
     <link rel="stylesheet" type="text/css" href="css/myStyle.css">
@@ -96,17 +97,13 @@
 
       </div>
 
-      <div class="row">
-
-
+    <div class="row">
       <div class="col-md-8">
         <b>Current Month: </b> <span id="monthInfo"></span>
-        Time Update: <input type="range" name="yearmonth" min="23956" max="24182" step="1" value="0" id="slider" oninput = ";"> <br>
-
-
+        <input type="range" name="yearmonth" min="23956" max="24182" step="1" value="0" id="slider" oninput = ";"> <br>
       </div>
 
-            <div class="col-md-4">
+      <div class="col-md-4">
         Filter By:
         <label><input type="checkbox" name="All" value="All" title="All" onchange="update_filters(this.value, this.checked)"></input>All</label>
         <label><input type="checkbox" name="1br" value="1br" title="1br" onchange="update_filters(this.value, this.checked)"></input>1br</label>
@@ -114,14 +111,12 @@
         <label><input type="checkbox" name="3br" value="3br" title="3br" onchange="update_filters(this.value, this.checked)"></input>3br</label>
         <label><input type="checkbox" name="4br" value="4br" title="4br" onchange="update_filters(this.value, this.checked)"></input>4br</label>
         <label><input type="checkbox" name="5br" value="5br" title="5br" onchange="update_filters(this.value, this.checked)"></input>5br</label>
-    </div>
       </div>
-
-
+    </div>
 
     <div class="row">
       <div class="col-md-8" id="mapVis">
-                <b>Housing Data to Display: </b>
+          <b>Housing Data to Display: </b>
           <label><input type="radio" name="mapfilter" value="All" onchange="mapfilter(this.value)" checked></label> All Homes
           <label><input type="radio" name="mapfilter" value="1br" onchange="mapfilter(this.value)"></label> 1BR
           <label><input type="radio" name="mapfilter" value="2br" onchange="mapfilter(this.value)"></label> 2BR
@@ -171,7 +166,8 @@ var vars = {
   'state': "NY"
 }
 
-var dateFormatter = d3.time.format("%Y-%m-%d");
+var dateFormatter = d3.time.format("%m-%Y");
+document.getElementById('monthInfo').innerHTML = vars.month
 
 var initVis = function() {
   var map_vis = new MapVis(d3.select("#mapVis"), MyEventHandler, mapData, realData, vars)
@@ -182,15 +178,17 @@ var initVis = function() {
 
   // when you move the time scroller
   $(MyEventHandler).bind("selectionChanged", function(event) {
-    // document.getElementById('monthInfo').innerHTML = dateFormatter(selectionStart) + " -> " + dateFormatter(selectionEnd)
+    document.getElementById('monthInfo').innerHTML = vars.month
     table_vis.onSelectionChange(vars);
     line_vis.onSelectionChange(vars);
     hist_vis.onSelectionChange(vars);
     map_vis.onSelectionChange(vars);
+    gdp_vis.onSelectionChange(vars);
   });
 
   $(MyEventHandler).bind("mapChanged", function(event){
     map_vis.onSelectionChange(vars);
+    line_vis.onSelectionChange(vars);
   });
 
   $(MyEventHandler).bind("tableFilter", function(event) {
@@ -307,13 +305,6 @@ function clickeddiv(){
   console.log("WEFOIJ");
   $(MyEventHandler).trigger("selectionChanged");
 }
-
-/*
-$(document).click(function() {
-    //console.log("poopetrator")
-});
-*/
-
 
 </script>
 </body>

@@ -13,7 +13,7 @@ HistVis = function(_parentElement, _realData, _vars) {
     this.num_bins = 15;
     this.max_price = 0;
 
-    this.margin = {top: 20, right: 20, bottom: 30, left: 0}
+    this.margin = {top: 20, right: 20, bottom: 30, left: 15}
     this.width = 450 - this.margin.left - this.margin.right
     this.height = 250 - this.margin.top - this.margin.bottom
 
@@ -34,23 +34,6 @@ HistVis.prototype.initVis = function() {
         .append("g")
             .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
 
-    // this.svg.append("text")
-    //     .attr("transform", function(d) { return "translate(100,0)"})
-    //     .attr("dy", ".35em")
-    //     .style("text-anchor", "middle")
-    //     .text("Age Distribution")
-
-    // this.area = d3.svg.area()
-    //     .interpolate("monotone")
-    //     .x0(0)
-    //     .x1(function(d) { return that.x(d); })
-    //     .y(function(d, i) { return that.y(i); })
-
-    // this.svg.append("g")
-    //     .attr("class", "y axis")
-    //     // .attr("transform", )
-
-    // call the update method
     this.updateVis();
 }
 
@@ -64,6 +47,7 @@ HistVis.prototype.updateVis = function() {
     this.svg.selectAll(".room").remove();
     this.svg.selectAll(".rule").remove();
     this.svg.selectAll("text").remove();
+    this.svg.selectAll(".legend").remove();
 
     var rooms = d3.layout.stack()((that.everything).map(function(type) {
         return that.displayData.map(function(d, i) {
@@ -77,7 +61,8 @@ HistVis.prototype.updateVis = function() {
     var y = d3.scale.linear()
         .range([0, this.height])
 
-    var z = d3.scale.ordinal().range(["lightpink", "darkgray", "lightblue", "green", "red", "orange"])
+    var z = d3.scale.ordinal()
+        .range(["lightblue", "skyblue", "lightgreen", "cyan", "lightgrey", "lightyellow"])
 
     x.domain(d3.range(that.num_bins));
     y.domain([0, d3.max(rooms[rooms.length - 1], function(d) { return d.y0 + d.y; })]);
@@ -101,7 +86,6 @@ HistVis.prototype.updateVis = function() {
         .attr("width", x.rangeBand())
         .attr("transform", "translate(0," + this.height + ")")
 
-    console.log(that.max_price)
     var label = this.svg.selectAll("text")
         .data(x.domain())
     .enter().append("text")
@@ -115,58 +99,47 @@ HistVis.prototype.updateVis = function() {
         })
         .attr("transform", "translate(0," + this.height + ")")
 
-    // var xrule = this.svg.selectAll(".rule")
-    //     .data(x.ticks(5))
-    // xrule.enter()
-    //     .append("g")
-    //     .attr("class", "rule")
-    //     .attr("transform", function(d) { 
-    //         // var desired = -y(d) + that.height;
-    //         return "translate(" + x(d) + "," + that.height -+ ")" 
-    //     })
-    // xrule.append("line")
-    //     .attr("x2", that.width)
-    //     // .style("stroke", function(d) { return d ? "#fff" : "#000"; })
-    //     .style("stroke-opacity", function(d) { return d ? .7 : null; });
-    // xrule.append("text")
-    //     .attr("x", that.width + 6)
-    //     .attr("dy", ".35em")
-    //     .text(d3.format(",d"));
-
-
     var rule = this.svg.selectAll(".rule")
         .data(y.ticks(5))
     rule.enter()
         .append("g")
         .attr("class", "rule")
         .attr("transform", function(d) { 
-            var desired = -y(d) + that.height;
-            return "translate(0," + desired + ")" 
+            var desired = -y(d) + that.height - 5;
+            return "translate(-435," + desired + ")" 
         })
-    rule.append("line")
-        .attr("x2", that.width)
-        // .style("stroke", function(d) { return d ? "#fff" : "#000"; })
-        .style("stroke-opacity", function(d) { return d ? .7 : null; });
+    // rule.append("line")
+    //     .style("stroke", function(d) { return d ? "#fff" : "#000"; })
+    //     .style("stroke-opacity", function(d) { return d ? .7 : null; });
     rule.append("text")
         .attr("x", that.width + 6)
-        .attr("dy", ".35em")
-        .text(d3.format(",d"));
+        .attr("dy", ".7em")
+        .text(d3.format(",d"))
 
+    var legendRectSize = 10
+    var legendSpacing = 4
 
-
-    // var path = this.svg.selectAll(".area")
-    //     .data([this.displayData])
-
-    // path.enter()
-    //     .append("path")
-    //     .attr("class", "area");
-
-    // path
-    //     .transition()
-    //     .attr("d", this.area)
-
-    // path.exit()
-    //     .remove();
+    var legend = this.svg.selectAll(".legend")
+        .data(z.domain())
+    legend.enter()
+        .append("g")
+        .attr("class", "legend")
+        .attr("transform", function(d, i) {
+            var height = legendRectSize + legendSpacing;
+            var offset = height * z.domain().length / 2;
+            var horz = -2 * legendRectSize + 270;
+            var vert = i * height - offset + 30;
+            return "translate(" + horz + "," + vert + ")";
+        })
+    legend.append("rect")
+        .attr("width", legendRectSize)
+        .attr("height", legendRectSize)
+        .style("fill", z)
+        .style("stroke", z)
+    legend.append("text")
+        .attr("x", legendRectSize + legendSpacing)
+        .attr("y", legendRectSize - legendSpacing + 3)
+        .text(function(d) { return that.everything[d]; })
 }
 
 /**
@@ -201,11 +174,6 @@ HistVis.prototype.filterAndAggregate = function() {
     var that = this;
     var max_price = 0;
 
-    console.log(that.categories)
-
-    // var groups = []
-    // for (i=0; i < that.categories.length; i++) 
-    //     groups.push([])
     var groups = {
         "1br": [0], "2br": [0],
         "3br": [0], "4br": [0],
@@ -229,7 +197,6 @@ HistVis.prototype.filterAndAggregate = function() {
         max_price = max_price < cand_max ? cand_max : max_price
     }
     that.max_price = max_price
-    console.log(max_price)
 
     var answer = d3.range(0, that.num_bins).map(function(d, i) {
         var bin = [];
@@ -244,7 +211,6 @@ HistVis.prototype.filterAndAggregate = function() {
                 }
             }
         }
-        // console.log(counts)
         return {
             "1br": counts[0], "2br": counts[1],
             "3br": counts[2], "4br": counts[3],

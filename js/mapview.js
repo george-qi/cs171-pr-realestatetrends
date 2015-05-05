@@ -77,7 +77,7 @@ MapVis.prototype.updateVis = function() {
         .data(that.displayData)
         .enter().append("g")
             .attr("class", "node")
-            .attr("id", function(d){ return d.City.toString().replace(/\W+/g,"")})
+            .attr("id", function(d) { return d.City.replace(/\./g,' ').replace(/\s/g, ''); })
         .append("circle")
         .attr("r", function(d){ return radius(d[that.mapdisplay]); })
         .attr("cx", function(d){ return d.x; })
@@ -102,7 +102,6 @@ MapVis.prototype.onSelectionChange = function(_vars) {
     this.month = _vars.month
     this.mapdisplay = _vars.mapdisplay
     this.displayData = this.filterAndAggregate();
-    console.log(this.displayData);
     this.updateVis();
 }
 
@@ -177,18 +176,12 @@ MapVis.prototype.descriptions = function(d){
         .attr("x", d.x + maxchars*6/2)
         .attr("y", d.y + 40)
         .attr("text-anchor", "middle")
-        .text(function(){
-            if (d[that.mapdisplay] == -1){
+        .text(function( ){
+            if (d[that.mapdisplay] == -1) {
                 return that.mapdisplay + ": No Data";
             }
-            else{
-                return that.mapdisplay + ": " + d[that.mapdisplay];
-            }
-            })
-    /*
-    that.svg.append("text")
-        .attr("class", "citydescription")
-    */
+            else{ return that.mapdisplay + ": " + d[that.mapdisplay]; }
+        })
 }
 
 MapVis.prototype.removedescriptions = function(){
@@ -208,7 +201,6 @@ MapVis.prototype.addSearchBubble = function(word){
         return
     }
     var searchednode = d[0][0]._data_;
-    var coords = d.attr("transform").substring("10").replace(")","").split(",");
     console.log(coords)
     /*
     var relevantindex = -1
@@ -240,8 +232,8 @@ MapVis.prototype.addSearchBubble = function(word){
         "<div>" + 
         "</div>"  
     )
-    .style("left", (coords[0] + 180) + "px")
-    .style("top", (coords[1] + 20) + "px");
+    .style("left", (searchednode.x + 180) + "px")
+    .style("top", (searchednode.y + 20) + "px");
 
     d3.selectAll('.node')
         .classed('.node-described', function(d){return d.City == searchedcity})

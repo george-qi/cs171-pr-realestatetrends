@@ -6,16 +6,19 @@ GdpVis = function(_parentElement, _econData, _stateGdpData, _vars) {
     this.parentElement = _parentElement;
     this.econData = _econData;
     this.stateGdpData = _stateGdpData;
-    this.month = "1996-04";
-    this.displayData = [];
     this.state = _vars.state; 
+    this.month = "1996-04";
+    this.current_month = _vars.month;
+    this.current_gdp = 0;
+    this.current_stategdp = 0;
+    this.displayData = [];
 
-    this.margin = {top: 20, right: 20, bottom: 30, left: 50}
-    this.width = 450 - this.margin.left - this.margin.right
+    this.margin = {top: 20, right: 0, bottom: 30, left: 55}
+    this.width = 350 - this.margin.left - this.margin.right
     this.height = 250 - this.margin.top - this.margin.bottom
 
     this.averageData = this.calcAverages();
-    this.average_max = d3.max(this.averageData, function(d) { return d["allhomes"]; })
+    this.average_max = d3.max(this.averageData, function(d) { return d.gdp; })
 
     this.initVis();
 }
@@ -54,13 +57,13 @@ GdpVis.prototype.initVis = function() {
 
     this.svg.append("g")
         .attr("class", "y axis")
-    // .append("text")
-    //     .attr("transform", "rotate(-90)")
-    //     .attr("x", -55)
-    //     .attr("y", -65)
-    //     .attr("dy", ".71em")
-    //     .style("text-anchor", "end")
-    //     .text("Number of Votes")
+    .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -55)
+        .attr("y", -55)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("GDP Per Capita")
 
     this.updateVis();
 }
@@ -70,22 +73,34 @@ GdpVis.prototype.initVis = function() {
  */
 GdpVis.prototype.updateVis = function() {
     var that = this;
-    that.svg.selectAll('.line').remove();
-    that.svg.selectAll('.label').remove();
+    this.svg.selectAll('.line').remove();
+    this.svg.selectAll('.label').remove();
+    this.svg.selectAll('.legend').remove();
+    this.svg.selectAll('circle').remove();
 
     var max_gdp = d3.max(this.displayData, function(d) { return d.gdp; })
     if (max_gdp < that.average_max) max_gdp = that.average_max;
     this.y.domain([0, max_gdp])
 
-    // console.log(that.displayData)
-    // console.log(that.averageData)
+    var time = that.current_month.split("-")
+    if (Number(time[0]) > 2013)
+        time[0] = "2013"
+    var current_date = new Date(Number(time[0]), 1, 1)
 
     var line = d3.svg.line()
-        .x(function(d) { return that.x(d.date); })
+        .x(function(d) { 
+            if (d.date.getTime() == current_date.getTime())
+                that.current_stategdp = d.gdp;
+            return that.x(d.date); 
+        })
         .y(function(d) { return that.y(d.gdp); })
 
     var line2 = d3.svg.line()
-        .x(function(d) { return that.x(d.date); })
+        .x(function(d) { 
+            if (d.date.getTime() == current_date.getTime())
+                that.current_gdp = d.gdp;
+            return that.x(d.date); 
+        })
         .y(function(d) { return that.y(d.gdp); })
 
     this.svg.select(".x.axis")
@@ -96,29 +111,65 @@ GdpVis.prototype.updateVis = function() {
 
     this.svg.append("path")
         .datum(that.displayData)
+        .style("stroke-width", 2)
+        .style("stroke-opacity", 0.6)
         .attr("class", "line")
         .attr("d", line)
 
     this.svg.append("path")
         .datum(that.averageData)
+        .style("stroke-width", 2)
+        .style("stroke-opacity", 0.6)
+        .style("stroke", "green")
         .attr("class", "line")
         .attr("d", line2)
 
-    this.svg.append("text")
-        .attr("class", "label")
-        .attr("transform", "translate(" + (this.width) + "," + (that.y(that.displayData[17].gdp)) + ")")
-        .attr("dy", ".35em")
-        .attr("text-anchor", "start")
-        .style("fill", "steelblue")
-        .text(that.state)    
+    var marker = this.svg.append("circle")
+        .attr("r", 5)
+        .style("fill", "#FFFFFF")
+        .style("stroke", "#FB5050")
+        .style("stroke-width", "3px")
 
-    this.svg.append("text")
-        .attr("class", "label")
-        .attr("transform", "translate(" + (this.width) + "," + (that.y(that.averageData[17].gdp)) + ")")
-        .attr("dy", ".35em")
-        .attr("text-anchor", "start")
-        .style("fill", "red")
-        .text("Average State GDP")
+    var avg_marker = this.svg.append("circle")
+        .attr("r", 5)
+        .style("fill", "#FFFFFF")
+        .style("stroke", "#FB5050")
+        .style("stroke-width", "3px")
+
+    marker
+        .transition()
+        .attr("cx", that.x(current_date))
+        .attr("cy", that.y(that.current_stategdp))
+    avg_marker
+        .transition()
+        .attr("cx", that.x(current_date))
+        .attr("cy", that.y(that.current_gdp))
+
+    var legendRectSize = 10
+    var legendSpacing = 4
+    var z = d3.scale.ordinal().range(["steelblue", "green"])
+    var cats = [that.state, "Average"]
+    var legend = this.svg.selectAll(".legend")
+        .data(["steelblue", "green"])
+    legend.enter()
+        .append("g")
+        .attr("class", "legend")
+        .attr("transform", function(d, i) {
+            var height = legendRectSize + legendSpacing;
+            var offset = height;
+            var horz = -2 * legendRectSize + 30;
+            var vert = i * height - offset + 10;
+            return "translate(" + horz + "," + vert + ")";
+        })
+    legend.append("rect")
+        .attr("width", legendRectSize)
+        .attr("height", legendRectSize)
+        .style("fill", z)
+        .style("stroke", z)
+    legend.append("text")
+        .attr("x", legendRectSize + legendSpacing)
+        .attr("y", legendRectSize - legendSpacing + 3)
+        .text(function(d, i) { return cats[i]; })
 }
 
 /**
@@ -128,6 +179,7 @@ GdpVis.prototype.updateVis = function() {
  */
 GdpVis.prototype.onSelectionChange = function(_vars) {
     this.state = _vars.state;
+    this.current_month = _vars.month;
     this.displayData = this.filterAndAggregate();
     this.updateVis();
 }
@@ -147,7 +199,6 @@ GdpVis.prototype.onSelectionChange = function(_vars) {
  */
 GdpVis.prototype.filterAndAggregate = function() {
     var that = this;
-    console.log(that.state)
 
     var filtered = (that.stateGdpData).filter(function(d) {
         return d.state == that.state;
@@ -177,10 +228,9 @@ GdpVis.prototype.calcAverages = function() {
                 count += 1
             }
         })
-        total_gdp = total_gdp * 1000000
         return {
             date: new Date(base_year + d, 1, 1),
-            gdp: total_gdp / (count * 50)
+            gdp: total_gdp * 3.5 / count * 1000
         }
     })
 }
