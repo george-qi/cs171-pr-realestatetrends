@@ -118,11 +118,9 @@ td {
 }
 
 .scroll {
-    max-height: 470px;
-    overflow: auto;
+  max-height: 470px;
+  overflow: auto;
 }
-
-
 
 path {
   fill: none;

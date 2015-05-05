@@ -14,10 +14,6 @@ TableVis = function(_parentElement, _realData, _vars) {
     this.data = _realData;
     this.displayData = [];
 
-    // this.margin = {top: 20, right: 20, bottom: 30, left: 20}
-    // this.width = 530 - this.margin.left - this.margin.right
-    // this.height = 330 - this.margin.top - this.margin.bottom
-
     this.vars = {
         'month': _vars.month,
         'filter': [],
@@ -34,20 +30,10 @@ TableVis = function(_parentElement, _realData, _vars) {
  */
 TableVis.prototype.initVis = function() {
     var that = this;
-    
     this.wrangleData(null);
-
-    // filter, aggregate, modify data
-    // this.svg = this.parentElement.append("svg")
-    //         .attr("width", this.width + this.margin.left + this.margin.right)
-    //         .attr("height", this.height + this.margin.top + this.margin.bottom )
-    //     .append("g")
-    //         .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
 
     var table = this.parentElement;
      table.text("Real Estate Values").style("font-weight", "bold").style("text-align", "center");
-        // .append("table")
-        // .attr("class", "tableSection"),
         thead = table.append("table").attr("class", "thead");
         tbody = table.append("div").attr("class","scroll").append("table");
     
@@ -74,12 +60,17 @@ TableVis.prototype.initVis = function() {
         .append("td")
         .text(function(d) { return d; })
         .on("mouseover", function(d, i) {
+            city = d3.select(this.parentNode)[0][0].cells[0].innerText.replace(/\./g,' ').replace(/\s/g, '');
+            var node = d3.select("#" + city)
+            node.style("fill", "yellow")
             d3.select(this.parentNode)
-            .style("background-color", "#F3ED86");
+                .style("background-color", "#F3ED86");
         })
-        .on("mouseout", function() {
+        .on("mouseout", function() {       
+            var node = d3.select("#" + city)
+            node.style("fill", "steelblue")
             tbody.selectAll("tr")
-            .style("background-color", null)
+                .style("background-color", null)
         });
 
     click_header(that.vars.sort_by.column, that.vars)
@@ -105,6 +96,7 @@ TableVis.prototype.wrangleData = function() {
  */
 TableVis.prototype.updateVis = function() {
     var that = this;
+    var city;
     d3.selectAll("table").remove()
 
     var table = this.parentElement;
@@ -113,7 +105,6 @@ TableVis.prototype.updateVis = function() {
         // .attr("class", "tableSection"),
         thead = table.append("table").attr("class", "thead");
         tbody = table.append("div").attr("class","scroll").append("table");
-    
 
     thead.append("tr").selectAll("th")
         .data(that.vars.columns)
@@ -137,12 +128,17 @@ TableVis.prototype.updateVis = function() {
         .append("td")
         .text(function(d) { return d; })
         .on("mouseover", function(d, i) {
+            city = d3.select(this.parentNode)[0][0].cells[0].innerText.replace(/\./g,' ').replace(/\s/g, '');
+            var node = d3.select("#" + city)
+            node.style("fill", "yellow")
             d3.select(this.parentNode)
-            .style("background-color", "#F3ED86");
+                .style("background-color", "#F3ED86");
         })
         .on("mouseout", function() {
+            var node = d3.select("#" + city)
+            node.style("fill", "steelblue")
             tbody.selectAll("tr")
-            .style("background-color", null)
+                .style("background-color", null)
         });
 
     sort_by(that.vars.sort_by.column, that.vars)
@@ -179,7 +175,7 @@ TableVis.prototype.onSelectionChange = function(_vars) {
 TableVis.prototype.filterAndAggregate = function(yearmonth) {
     var that = this;    
 
-    var filteredData = this.data.map(function(d) {
+    return this.data.map(function(d) {
         var tmp = d.city.split(", ")
         for (i=0; i < 227; i++) {
             if (d.months[i].month == that.vars.month) {
@@ -196,8 +192,6 @@ TableVis.prototype.filterAndAggregate = function(yearmonth) {
             }
         }
     })
-
-    return filteredData;
 }
 
 TableVis.prototype.row_data = function(row, i) {
@@ -216,15 +210,12 @@ function sort_by(header, vars) {
 
     d3.select(".thead").selectAll("th").attr("id", null);
 
-    // For those specific columns, we are sorting strings
     if (header == "City" || header == "State") {
-
         tbody.selectAll("tr").sort(function(a, b) {
             var ascending = d3.ascending(a[header], b[header]);
             return is_sorted ? ascending : - ascending;
         });
 
-    // For the others, we sort numerical values
     } else {
         tbody.selectAll("tr").sort(function(a, b) {
             var x = a[header]
