@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <style>
+		path {
+		  fill: none;
+		  stroke-linejoin: round;
+		}
+
+		.land {
+		  fill: #ddd;
+		}
+
+		.states,
+		.hexagons path {
+		  stroke: #fff;
+		}
+	</style>
+    <title>Homework 3 - MyWorld Data</title>
+
+    <!-- ADD Libraries-->
+    <script src="libs/d3/d3.min.js" charset="utf-8"></script>
+    <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
+    <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+    <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+
+    <!--Stylesheets-->
+    <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
+
+    <!-- Get some nice font-->
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+
+</head>
+<body>
+    <div class="container">
+        <h1>CS171 Project</h1>
+
+        <div class="row">
+            <div class="col-md-8 col-sm-12">
+               <p> This is a prototype for our project</p>
+            </div>
+
+        </div>
+        Time Update: <input type="range" name="yearmonth" min="23956" max="24182" step="1" value="0" id="slider" oninput = ";"> <br>
+    </div>
+    <script>
+		var width = 1200; 
+		var height = 700 ;
+		var realestatedata;
+		var filtereddata;
+		/*
+		var timeScale = 
+		1996-04
+		2015-02
+		*/
+		
+	    var projection = d3.geo.albersUsa()
+    		.scale(1200)
+    		.translate([width / 2, height / 2])
+    		.precision(.1);      
+	    var svg = d3.select("body").append("svg")
+	          .attr("width", width)
+	          .attr("height", height);
+	    var path = d3.geo.path()
+	          .projection(projection);
+	    var g = svg.append("g");
+	    function createhexagons(yearmonth){
+	    	svg.selectAll('.node').remove()
+	    	var year = Math.floor(yearmonth / 12)
+	    	var month = yearmonth % 12
+	    	if (month == 0){
+	    		month = 12
+	    	}
+	    	filtereddata = jQuery.extend(true, {}, realestatedata)
+	    	for (x in filtereddata){
+	    		filtereddata[x].months = realestatedata[x].months.filter(function(a, b){
+	    			var yearmontharray = a.month.split("-");
+	    			var currentyear = parseInt(yearmontharray[0])
+	    			var currentmonth = parseInt(yearmontharray[1])
+	    			if (currentyear == year){
+	    				if (currentmonth == month){
+	    					return true
+	    				}
+	    			}
+	    			return false
+	    		})
+	    		//Should be flipped since Jacob flipped Latitude and Longitudes
+	    		filtereddata[x].x = projection([filtereddata[x].latitude, filtereddata[x].longitude])[0]
+	    		filtereddata[x].y = projection([filtereddata[x].latitude, filtereddata[x].longitude])[1]
+	    	}
+	    	array = []
+    		for (x in filtereddata){
+    			array.push(filtereddata[x])
+    		}
+    		filtereddata = array
+	    	console.log('poop');
+	    	console.log(filtereddata)
+	    	console.log(realestatedata)
+	    	var max = d3.max(filtereddata, function(d){return d.months[0].allhomes})
+	    	var min = d3.min(filtereddata, function(d){return d.months[0].allhomes})
+	    	var radius = d3.scale.linear()
+	    		.domain([min, max])
+				.range([0, 12]);
+	    	/*
+	    	svg.selectAll(".nodes")
+	    		.data(filtereddata)
+	    		.enter().append("circle", ".nodes")
+	    		.attr("transform", function(d){
+	    			console.log("penis");
+	    			return "translate(300,300)"
+	    		})
+	    		.attr("r", "8px")
+	    		.attr("fill", "steelblue")
+			
+	    	svg.selectAll("nodes")
+	    		.data(filtereddata)
+    		.enter().append("circle", "nodes")
+	    		.attr("cx", 300)
+	    		.attr("cy", 300)
+	    		.attr("fill", "steelblue")
+	    		.attr("r", "8px");
+	    	*/
+	    	svg.selectAll(".node")
+	    		.data(filtereddata)
+	    		.enter().append("g")
+	    			.attr("class", "node")
+	    		.append("circle")
+	    		.attr("r", function(d){return radius(d.months[0].allhomes)})
+	    		.attr("cx", function(d){return d.x})
+	    		.attr("cy", function(d){return d.y})
+	    		.attr("fill", "steelblue")
+
+	    	/*
+			var node = svg.selectAll(".node")
+		        .data(filtereddata)
+		      .enter()
+		        .append("g").attr("class", "node");
+					node.append("circle")
+					.attr("r", 5)
+					.attr("transform", function(d) { 
+          				return "translate("+d.x+","+d.y+")"; 
+        			});
+        	*/
+	    	
+	    	console.log(filtereddata);
+
+	    }
+	    /*
+	    var node = svg.selectAll(".node")
+	    		.data([3, 5, 8])
+	    		.enter().append("g")
+	    			.attr("class", "node");
+	    	node.append("circle")
+	    		.attr("r", 100)
+	    		.attr("cx", function(d,i){return 300*i + 500})
+	    		.attr("cy", function(d){return 300})
+	    		.attr("fill", "steelblue")
+		*/
+	      
+    	function ready(error, mapstuff, data){
+    		console.log(mapstuff)
+    		
+    		realestatedata = data;
+    		console.log(realestatedata)
+    	
+    		svg.append("path")
+    			.datum(topojson.feature(mapstuff, mapstuff.objects.land))
+    			.attr("class", "land")
+    			.attr("d", path);
+
+    		svg.append("path")
+    			.datum(topojson.mesh(mapstuff, mapstuff.objects.states, function(a, b) { return a !== b; }))
+    			.attr("class", "states")
+    			.attr("d", path);
+    		console.log(data)
+    		createhexagons(23956);
+    	}
+    	queue()
+    		.defer(d3.json, "us.json")
+    		.defer(d3.json, "data/data.json")
+    		.await(ready);
+    	d3.select("#slider").on("input", function(){
+   			createhexagons(this.value);
+   		})
+    </script>
+</body>
+</html>

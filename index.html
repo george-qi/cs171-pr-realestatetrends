@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>CS171 Project</title>
+
+  <!-- ADD Libraries-->
+  <script src="libs/d3/d3.min.js" charset="utf-8"></script>
+  <script src="http://d3js.org/queue.v1.min.js"></script>
+  <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
+  <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+  <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
+  <script src="http://d3js.org/queue.v1.min.js"></script>
+  <script src="http://d3js.org/topojson.v1.min.js"></script>
+  <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+
+
+  <!--Stylesheets-->
+  <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
+
+  <!-- Get some nice font-->
+  <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+
+    <!-- add own vis classes-->
+    <script src = "js/tableview.js"></script>
+    <script src = "js/mapview.js"></script>
+    <script src = "js/lineview.js"></script>
+    <script src = "js/gdpview.js"></script>
+    <script src = "js/histview.js"></script>
+
+    <!-- add own stylesheet-->
+    <link rel="stylesheet" type="text/css" href="css/myStyle.css">
+    <style>
+  .node {
+    fill: steelblue;
+    stroke: #000;
+    stroke-width: .9px;
+    stroke-opacity: 0.4;
+    opacity: 0.8;
+  }
+  .node-hover {
+    fill: red;
+    stroke: #000;
+    stroke-width: .9px;
+    stroke-opacity:;
+    opacity: 0.9;
+  }
+  .node-described{
+    fill: green;
+    stroke: #000;
+    stroke-width: .9px;
+    stroke-opacity: 0.95;
+    opacity: 0.9;
+  }
+  .searchbubble {
+    position: absolute;
+    width: 200px;
+    height: 190px;
+    line-height: 20px;
+    padding: 3px;
+    font-size: 11px;
+    text-align: center;
+    color: black;
+    background: yellow;
+    border: 4px solid green;
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.6) 1px 1px 2px 0px;
+  }
+  .searchbubble:after{
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-width: 10px;
+    border-style: solid;
+    border-color: yellow transparent transparent transparent;
+    top: 190px;
+    left: 82px;
+  }
+  .searchbubble p {
+    font-size: 12px;
+    margin: 0 0 0 0;
+    line-height: 12px;
+  }
+  #details{
+    position: relative;
+  }
+  #mapVis {
+    position: relative;
+  }
+
+</style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>US Real Estate Trends (1996-2015)</h1>
+      <span><a href="https://www.facebook.com/l.php?u=https%3A%2F%2Fdocs.google.com%2Fdocument%2Fd%2F1Wy16iYp8NWuVXU6eFsODci3Futs_Tak_BXSGW3DNVWA%2Fedit%3Fusp%3Dsharing&h=8AQHQAOHD">About &nbsp;&nbsp;</a></span>
+      <span><a href="https://youtu.be/jrwrMxgc-QE">ScreenCast &nbsp;&nbsp;</a></span>
+      <span><a href="https://www.facebook.com/l.php?u=https%3A%2F%2Fdocs.google.com%2Fdocument%2Fd%2F1eNmHXtWRHDzrhpF1tHNwT7aX-FV8PnSMBq_YksWdlPc%2Fedit&h=8AQHQAOHD">Process Book </a></span>
+      <div class="row">
+        <div class="col-md-8 col-sm-12">
+         <p> By Jacob Kim, Lawrence Kim, George Qi</p>
+        </div>
+
+      </div>
+
+    <div class="row">
+      <div class="col-md-8">
+        <b>Current Month: </b> <span id="monthInfo"></span>
+        <input type="range" name="yearmonth" min="23956" max="24182" step="1" value="0" id="slider" oninput = ";"> <br>
+      </div>
+
+      <div class="col-md-4">
+        Filter By:
+        <label><input type="checkbox" name="All" value="All" title="All" onchange="update_filters(this.value, this.checked)"></input>All</label>
+        <label><input type="checkbox" name="1br" value="1br" title="1br" onchange="update_filters(this.value, this.checked)"></input>1br</label>
+        <label><input type="checkbox" name="2br" value="2br" title="2br" onchange="update_filters(this.value, this.checked)"></input>2br</label>
+        <label><input type="checkbox" name="3br" value="3br" title="3br" onchange="update_filters(this.value, this.checked)"></input>3br</label>
+        <label><input type="checkbox" name="4br" value="4br" title="4br" onchange="update_filters(this.value, this.checked)"></input>4br</label>
+        <label><input type="checkbox" name="5br" value="5br" title="5br" onchange="update_filters(this.value, this.checked)"></input>5br</label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-8" id="mapVis">
+          <b>Housing Data to Display: </b>
+          <label><input type="radio" name="mapfilter" value="All" onchange="mapfilter(this.value)" checked></label> All Homes
+          <label><input type="radio" name="mapfilter" value="1br" onchange="mapfilter(this.value)"></label> 1BR
+          <label><input type="radio" name="mapfilter" value="2br" onchange="mapfilter(this.value)"></label> 2BR
+          <label><input type="radio" name="mapfilter" value="3br" onchange="mapfilter(this.value)"></label> 3BR
+          <label><input type="radio" name="mapfilter" value="4br" onchange="mapfilter(this.value)"></label> 4BR
+          <label><input type="radio" name="mapfilter" value="5br" onchange="mapfilter(this.value)"></label> 5BR
+          <div id="searchBarDiv">
+            <form id="searchBar">
+              <input type="text" name="search" placeholder="City" id="searchField">
+              <input type="button" value="Search" id="searchButton">
+            </form>
+          </div>
+      </div>
+      <div class="col-md-4" id="tableVis">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4" id="lineVis">
+        <text class="title"><p><b>Home Value Over Time for Selected City</b></p></text>
+      </div>
+      <div class="col-md-4" id="gdpVis">
+        <text class="title"><p><b>State GDP Over Time</b></p></text>
+      </div>
+      <div class="col-md-4" id="histVis">
+        <text class="title"><p><b>Home Value Distribution</b></p></text>
+      </div>
+    </div>
+  </div>
+
+<script>
+
+// $(function() { 
+//////////////////////////////
+////// GLOBAL VARIABLES //////
+//////////////////////////////
+var mapData;
+var realData;
+var econData;
+var stateGdpData;
+var MyEventHandler = new Object();
+var vars = {
+  'month': "1996-04",
+  'filter': [],
+  'mapdisplay': 'All', 
+  'city': "New York",
+  'state': "NY"
+}
+
+var dateFormatter = d3.time.format("%m-%Y");
+document.getElementById('monthInfo').innerHTML = vars.month
+
+// Initialize the Visualization
+var initVis = function() {
+  var map_vis = new MapVis(d3.select("#mapVis"), MyEventHandler, mapData, realData, vars)
+  var table_vis = new TableVis(d3.select("#tableVis"), realData, vars)
+  var line_vis = new LineVis(d3.select("#lineVis"), realData, vars)
+  var gdp_vis = new GdpVis(d3.select("#gdpVis"), econData, stateGdpData, vars)
+  var hist_vis = new HistVis(d3.select("#histVis"), realData, vars)
+
+  // when you move the time scroller
+  $(MyEventHandler).bind("selectionChanged", function(event) {
+    document.getElementById('monthInfo').innerHTML = vars.month
+    table_vis.onSelectionChange(vars);
+    line_vis.onSelectionChange(vars);
+    hist_vis.onSelectionChange(vars);
+    map_vis.onSelectionChange(vars);
+    gdp_vis.onSelectionChange(vars);
+  });
+
+  //Upon Hovering over a node (Coexists with the "nodeHover" event)
+  $(MyEventHandler).bind("mapChanged", function(event){
+    map_vis.onSelectionChange(vars);
+    line_vis.onSelectionChange(vars);
+  });
+
+  //Event Handler for Filtering Table
+  $(MyEventHandler).bind("tableFilter", function(event) {
+    table_vis.onSelectionChange(vars);
+    hist_vis.onSelectionChange(vars);
+  })
+
+  // when you hover over a node
+  $(MyEventHandler).bind("nodeHover", function(event, city, state) {
+    vars.city = city;
+    vars.state = state;
+    line_vis.onSelectionChange(vars);
+    gdp_vis.onSelectionChange(vars);
+  });
+
+  // For creating the small descriptions upon hovering over a node
+  $(MyEventHandler).bind("mapHover", function(event, node) {
+    map_vis.descriptions(node);
+  });
+
+  // 
+  $(MyEventHandler).bind("Search", function(event, word){
+    map_vis.addSearchBubble(word);
+  });
+
+  $(MyEventHandler).bind("nodedeHover", function(event, node){
+    map_vis.removedescriptions();
+  })
+ 
+}
+
+// call this function after both files are loaded -- error should be "null" if no error
+var dataLoaded = function (error, _mapData, _realData, _econData, _stateGdpData) {
+  if (!error) {
+    array = []
+    for (x in _realData) {
+      _realData[x].label = _realData[x].city
+      array.push(_realData[x])
+    }
+    realData = array;
+    mapData = _mapData;
+    econData = _econData;
+    stateGdpData = _stateGdpData;
+
+    initVis(vars.month);
+    autocomp();
+  }
+}
+
+var startHere = function() {
+  queue()
+    .defer(d3.json, "us.json")
+    .defer(d3.json, "data/data_v2.json")
+    .defer(d3.json, "data/econdata.json")
+    .defer(d3.json, "data/state_gdp.json")
+    .await(dataLoaded)
+}
+
+startHere();
+
+//Upon changing Time Slider
+
+d3.select("#slider").on("input", function(){
+  var year = Math.floor(this.value / 12)
+  var month = this.value % 12
+  if (month == 0) month = 12
+
+  var month_string = month < 10 ? "0" + month : String(month)
+  var ans = year + "-" + month
+
+  vars.month = year + "-" + month_string
+  $(MyEventHandler).trigger("selectionChanged")
+})
+
+// Updating Filters for Table
+
+function update_filters(value, add) {
+  if(add) {
+    if(vars.filter.indexOf(value) < 0) {
+      vars.filter.push(value)
+    }
+  } else {
+    var index = vars.filter.indexOf(value)
+    if(index > -1)
+      vars.filter.splice(index, 1);
+  }
+  
+  $(MyEventHandler).trigger("tableFilter")
+}
+
+//Function for Autocompletion of Search Bar
+function autocomp() {
+  $(function() {
+    $("#searchField").autocomplete({source: realData
+    }).data("ui-autocomplete")._renderItem = function(ul, item){
+      return $("<li>")
+        .data("ui-autocomplete-item", item)
+        .append("<a>" + item.city + "</a>")
+        .appendTo(ul);
+    };
+  })
+}
+
+//Triggers of Filtering of Map
+function mapfilter(d){
+  vars.mapdisplay = d;
+  $(MyEventHandler).trigger("mapChanged")
+}
+
+//When Search Button is Clicked
+$("#searchButton").click(function() {
+  var searchresult = $("#searchField").val();
+  $(MyEventHandler).trigger("Search", searchresult)
+})
+
+//To close description bubble upon finishing search
+function clickeddiv(){
+  $(MyEventHandler).trigger("selectionChanged");
+}
+
+</script>
+</body>
+</html>

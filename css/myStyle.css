@@ -1,0 +1,137 @@
+body{
+    font-family: 'PT Sans', sans-serif;
+}
+
+.title {
+  text-align: center;
+}
+
+.axis text {
+    font: 10px sans-serif;
+}
+
+.axis line,
+.axis path {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.boundingBox{
+    cursor: pointer;
+    fill: grey;
+    fill-opacity: .3;
+    pointer-events: all;
+}
+
+.brush{
+    fill: darkgrey;
+    fill-opacity: .5;
+    pointer-events: none;
+}
+
+
+svg {
+  font: 10px sans-serif;
+  width: 100%;
+}
+
+.bar {
+  cursor: pointer;
+}
+
+.bar rect {
+  fill: steelblue;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 0.5px;
+}
+
+.area {
+  fill: steelblue;
+  clip-path: url(#clip);
+}
+
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
+
+div.tooltip {   
+  position: absolute;           
+  text-align: center;           
+  width: 60px;                  
+  height: 28px;                 
+  padding: 2px;             
+  font: 12px sans-serif;        
+  /*background: lightsteelblue;   */
+  border: 0px;      
+  border-radius: 8px;           
+  pointer-events: none;         
+}
+
+h1 {
+  font-family: Tahoma, Arial, Helvetica, sans-serif;
+  font-size: 23px;
+  font-weight: normal;
+}
+
+table {
+  border-collapse: collapse;
+  font-size:9px;
+  font-weight: normal;
+}
+
+thead {
+  font-weight: bold;
+}
+
+table td, table th, caption {
+  padding: 3px;
+  border: 1px solid gray;;
+}
+
+table th {
+  cursor: n-resize;
+  width: 600px;
+}
+
+table th.sorted {
+  cursor: s-resize;
+}
+
+table td:first-child, table td:nth-child(2) {
+  text-align: center;
+}
+
+table tr.odd {
+  background-color: #EEE;
+}
+
+td {
+  text-align: right;
+  width: 500px;
+}
+
+.scroll {
+  max-height: 470px;
+  overflow: auto;
+}
+
+path {
+  fill: none;
+  stroke-linejoin: round;
+}
+
+.land {
+  fill: #ddd;
+}
+
+.states,
+.hexagons path {
+  stroke: #fff;
+}
