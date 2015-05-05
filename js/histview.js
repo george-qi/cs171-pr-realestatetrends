@@ -13,7 +13,7 @@ HistVis = function(_parentElement, _realData, _vars) {
     this.num_bins = 15;
     this.max_price = 0;
 
-    this.margin = {top: 20, right: 20, bottom: 30, left: 10}
+    this.margin = {top: 20, right: 20, bottom: 30, left: 15}
     this.width = 450 - this.margin.left - this.margin.right
     this.height = 250 - this.margin.top - this.margin.bottom
 
@@ -105,18 +105,16 @@ HistVis.prototype.updateVis = function() {
         .append("g")
         .attr("class", "rule")
         .attr("transform", function(d) { 
-            var desired = -y(d) + that.height;
-            console.log("desired", desired);
-            return "translate(0," + desired + ")" 
+            var desired = -y(d) + that.height - 5;
+            return "translate(-435," + desired + ")" 
         })
-    rule.append("line")
-        .attr("x2", that.width)
-        // .style("stroke", function(d) { return d ? "#fff" : "#000"; })
-        .style("stroke-opacity", function(d) { return d ? .7 : null; });
+    // rule.append("line")
+    //     .style("stroke", function(d) { return d ? "#fff" : "#000"; })
+    //     .style("stroke-opacity", function(d) { return d ? .7 : null; });
     rule.append("text")
         .attr("x", that.width + 6)
-        .attr("dy", ".35em")
-        .text(d3.format(",d"));
+        .attr("dy", ".7em")
+        .text(d3.format(",d"))
 
     var legendRectSize = 10
     var legendSpacing = 4
