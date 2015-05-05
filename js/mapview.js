@@ -182,12 +182,15 @@ MapVis.prototype.descriptions = function(d){
             }
             else{ return that.mapdisplay + ": " + d[that.mapdisplay]; }
         })
+    var node = d3.select("#" + d.City.toString().replace(/\./g,' ').replace(/\s/g, ''))
+    node.classed('node-hover', true)
 }
 
 MapVis.prototype.removedescriptions = function(){
     var that = this;
     that.svg.selectAll('rect').remove()
     that.svg.selectAll('.citydescription').remove()
+    d3.selectAll('.node').classed("node-hover", false)
 }
 
 MapVis.prototype.addSearchBubble = function(word){
@@ -234,13 +237,14 @@ MapVis.prototype.addSearchBubble = function(word){
     .style("left", (searchednode.x -61) + "px")
     .style("top", (searchednode.y -140) + "px");
 
-    d3.selectAll('.node')
-        .classed('.node-described', function(d){return d.City == searchedcity})
+    var node = d3.select("#" + searchedcity.toString().replace(/\./g,' ').replace(/\s/g, ''))
+    node.classed("node-described", true)
 
 }
 
 MapVis.prototype.removeSearchBubble = function(){
     d3.select(".searchbubble").remove();
+    //d3.selectAll('node').classed("node-described", false)
 
 }
 
