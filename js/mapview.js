@@ -100,6 +100,7 @@ MapVis.prototype.onSelectionChange = function(_vars) {
     this.month = _vars.month
     this.mapdisplay = _vars.mapdisplay
     this.displayData = this.filterAndAggregate();
+    console.log(this.displayData);
     this.updateVis();
 }
 
@@ -145,7 +146,13 @@ MapVis.prototype.descriptions = function(d){
     console.log(d);
     var that = this;
     var City = d.City.length + 2 + d.State.length
-    var Description = d[that.mapdisplay].toString().length + 5
+    var Description
+    if (d[that.mapdisplay] == -1){
+        Description = 12
+    }
+    else{
+        Description = d[that.mapdisplay].toString().length + 5
+    } 
     var maxchars = d3.max([City, Description])
     console.log(maxchars);
     that.svg.append("rect")
@@ -168,7 +175,14 @@ MapVis.prototype.descriptions = function(d){
         .attr("x", d.x + maxchars*6/2)
         .attr("y", d.y + 40)
         .attr("text-anchor", "middle")
-        .text(that.mapdisplay + ": " + d[that.mapdisplay])
+        .text(function(){
+            if (d[that.mapdisplay] == -1){
+                return that.mapdisplay + ": No Data";
+            }
+            else{
+                return that.mapdisplay + ": " + d[that.mapdisplay];
+            }
+            })
     /*
     that.svg.append("text")
         .attr("class", "citydescription")

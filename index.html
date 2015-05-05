@@ -12,6 +12,8 @@
   <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
   <script src="http://d3js.org/queue.v1.min.js"></script>
   <script src="http://d3js.org/topojson.v1.min.js"></script>
+  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 
   <!--Stylesheets-->
   <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
@@ -77,6 +79,12 @@
 
     <div class="row">
       <div class="col-md-8" id="mapVis">
+        <div id="searchBarDiv">
+            <form id="searchBar">
+              <input type="text" name="search" placeholder="City" id="searchField">
+              <input type="button" value="Search" id="searchButton">
+            </form>
+          </div>
       </div>
       <div class="col-md-4" id="tableVis">
         <!-- placeholder -->
@@ -157,6 +165,7 @@ var initVis = function() {
   $(MyEventHandler).bind("nodedeHover", function(event, node){
     map_vis.removedescriptions();
   })
+  //autocomp();
 }
 
 // call this function after both files are loaded -- error should be "null" if no error
@@ -165,6 +174,7 @@ var dataLoaded = function (error, _mapData, _realData, _econData, _stateGdpData)
     // console.log(_mapData)
     array = []
     for (x in _realData) {
+      _realData[x].label = _realData[x].city
       array.push(_realData[x])
     }
     realData = array;
@@ -172,6 +182,7 @@ var dataLoaded = function (error, _mapData, _realData, _econData, _stateGdpData)
     econData = _econData;
     stateGdpData = _stateGdpData;
 
+    console.log(realData);
     initVis(vars.month);
   }
 }
@@ -215,20 +226,22 @@ function update_filters(value, add) {
   $(MyEventHandler).trigger("tableFilter")
 }
 
+
+function autocomp() {
+  $(function() {
+    $("#searchField").autocomplete({source: realData});
+  })
+}
+
+
 function mapfilter(d){
   vars.mapdisplay = d;
   $(MyEventHandler).trigger("mapChanged")
-
-
 }
 
-function nonhover(d){
-  }
-
-function hover(d){
-  }
-
-
+$("#searchButton").click(function() {
+  console.log("blurgh")
+})
 
 </script>
 </body>
