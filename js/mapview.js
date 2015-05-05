@@ -213,7 +213,7 @@ MapVis.prototype.addSearchBubble = function(word){
         return
     }
     */
-    var searchbubble = d3.select("body").append("div")
+    var searchbubble = d3.select('#mapVis').append("div")
         .attr("class", "searchbubble")
         .attr("onclick", "clickeddiv()")
         .style("opacity", 0.9)
@@ -231,8 +231,8 @@ MapVis.prototype.addSearchBubble = function(word){
         "<div>" + 
         "</div>"  
     )
-    .style("left", (searchednode.x + 160) + "px")
-    .style("top", (searchednode.y ) + "px");
+    .style("left", (searchednode.x -60) + "px")
+    .style("top", (searchednode.y -140) + "px");
 
     d3.selectAll('.node')
         .classed('.node-described', function(d){return d.City == searchedcity})
